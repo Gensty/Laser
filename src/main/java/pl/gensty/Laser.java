@@ -84,16 +84,16 @@ public class Laser extends JFrame {
             return;
         }
 
-//        if (files.length != newNames.size()) {
-//            outputArea.append("Sprawdź czy w katalogu są wszystkie pliki DWG.\n");
-//            for (File fileName : files) {
-//                outputArea.append(fileName.getName() + "\n");
-//            }
-//            for (String newName : newNames) {
-//                outputArea.append(newName + "\n");
-//            }
-//            return;
-//        }
+        if (files.length != newNames.size()) {
+            outputArea.append("Sprawdź czy w katalogu są wszystkie pliki DWG.\n");
+            for (File fileName : files) {
+                outputArea.append(fileName.getName() + "\n");
+            }
+            for (String newName : newNames) {
+                outputArea.append(newName + "\n");
+            }
+            return;
+        }
 
         for (int i = 0; i < files.length && i < newNames.size(); i++) {
             File file = files[i];
