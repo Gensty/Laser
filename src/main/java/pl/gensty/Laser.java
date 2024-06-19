@@ -57,6 +57,10 @@ public class Laser extends JFrame {
         add(scrollPane, BorderLayout.CENTER);
     }
 
+    public void laser() {
+
+    }
+
     private void setFilenames() {
         String catalogPath = catalogPathField.getText();
         String excelPath = excelPathField.getText();
