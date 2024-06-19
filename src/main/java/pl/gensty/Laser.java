@@ -58,7 +58,7 @@ public class Laser extends JFrame {
     }
 
     public void laser() {
-        return;
+
     }
 
     private void setFilenames() {
