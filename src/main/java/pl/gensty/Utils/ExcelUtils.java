@@ -3,8 +3,11 @@ package pl.gensty.Utils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import pl.gensty.Configuration.AbstractConfig;
+import pl.gensty.Configuration.ConfigNPK;
+import pl.gensty.Configuration.ConfigSPR;
 import pl.gensty.DevicePart.AbstractPart;
 import pl.gensty.Enums.DeviceType;
+import pl.gensty.Enums.ModuleNPK;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -67,7 +70,8 @@ public class ExcelUtils {
         }
     }
 
-    public static Optional<List<AbstractPart>> readLaserFilesFromExcel(String excelPath, AbstractConfig abstractConfig, String module) {
+    public static Optional<List<AbstractPart>> readLaserFilesFromExcel(String excelPath, DeviceType deviceType,
+                                                                       AbstractConfig abstractConfig, String module) {
         List<AbstractPart> parts = new ArrayList<>();
 
         if (abstractConfig == null) {
@@ -97,17 +101,50 @@ public class ExcelUtils {
 
                 String numberEDT = getCellStringValue(row.getCell(1), evaluator);
                 String material = getCellStringValue(row.getCell(2), evaluator);
-                int thickness = getCellIntValue(row.getCell(3), evaluator);
-                int quantity = getCellIntValue(row.getCell(4), evaluator);
+                Integer thickness = getCellIntValue(row.getCell(3), evaluator);
+                Integer quantity = getCellIntValue(row.getCell(4), evaluator);
                 String description = getCellStringValue(row.getCell(5), evaluator);
-                boolean isElectric = getCellBooleanValue(row.getCell(6), evaluator);
-                boolean isPneumatic = getCellBooleanValue(row.getCell(7), evaluator);
-                boolean isManual = getCellBooleanValue(row.getCell(8), evaluator);
 
-                AbstractPart part = new AbstractPart(numberEDT, material, thickness, quantity, description,
-                        isElectric, isPneumatic, isManual);
+                Map<String, Object> params = new HashMap<>();
+                params.put("numberEDT", numberEDT);
+                params.put("material", material);
+                params.put("thickness", thickness);
+                params.put("quantity", quantity);
+                params.put("description", description);
 
-                parts.add(part);
+                if (abstractConfig instanceof ConfigSPR) {
+                    Boolean rolls = getCellBooleanValue(row.getCell(6), evaluator);
+                    Boolean upperDeck = getCellBooleanValue(row.getCell(7), evaluator);
+                    Boolean transportingUpperDeck = getCellBooleanValue(row.getCell(8), evaluator);
+                    Boolean guideBar = getCellBooleanValue(row.getCell(9), evaluator);
+
+                    params.put("rolls", rolls);
+                    params.put("upperDeck", upperDeck);
+                    params.put("transportingUpperDeck", transportingUpperDeck);
+                    params.put("guideBar", guideBar);
+                } else if (abstractConfig instanceof ConfigNPK) {
+                    if (ModuleNPK.STS.toString().equals(module) || ModuleNPK.STZ.toString().equals(module)) {
+                        Boolean filling1Way = getCellBooleanValue(row.getCell(6), evaluator);
+                        Boolean filling2Way = getCellBooleanValue(row.getCell(7), evaluator);
+                        Boolean fillingNoWay = getCellBooleanValue(row.getCell(8), evaluator);
+
+                        params.put("filling1Way", filling1Way);
+                        params.put("filling2Way", filling2Way);
+                        params.put("fillingNoWay", fillingNoWay);
+                    }
+                } else  {
+                    Boolean isElectric = getCellBooleanValue(row.getCell(6), evaluator);
+                    Boolean isPneumatic = getCellBooleanValue(row.getCell(7), evaluator);
+                    Boolean isManual = getCellBooleanValue(row.getCell(8), evaluator);
+
+                    params.put("isElectric", isElectric);
+                    params.put("isPneumatic", isPneumatic);
+                    params.put("isManual", isManual);
+                }
+
+                AbstractPart abstractPart = FactoryPart.createInstance(deviceType, module, params);
+
+                parts.add(abstractPart);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -181,7 +218,7 @@ public class ExcelUtils {
         }
     }
 
-    private static boolean getCellBooleanValue(Cell cell, FormulaEvaluator evaluator) {
+    private static Boolean getCellBooleanValue(Cell cell, FormulaEvaluator evaluator) {
         String value;
         boolean includeFile;
 

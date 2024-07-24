@@ -24,7 +24,6 @@ public class PartDriveType extends AbstractPart {
         return isManual;
     }
 
-
     public static class Builder extends AbstractPart.Builder<Builder> {
         private Boolean isElectric;
         private Boolean isPneumatic;

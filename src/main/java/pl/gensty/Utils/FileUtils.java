@@ -35,7 +35,7 @@ public class FileUtils {
 
         for (String module : modules) {
             String targetPath = createNewFolder(abstractConfig, module, materialType, outputArea, excelPathField, catalogPathField);
-//            copyFiles(deviceType, targetPath, MaterialType.SHEET, outputArea, excelPathField);
+            copyFiles(deviceType, abstractConfig, module, targetPath, MaterialType.SHEET, outputArea, excelPathField);
         }
     }
     private static List<String> deviceModules(AbstractConfig abstractConfig) {
@@ -98,23 +98,23 @@ public class FileUtils {
         return folderPath;
     }
 
-    public static void copyFiles(AbstractConfig abstractConfig, String module, String folderPath, MaterialType material, JTextArea outputArea, JTextField excelPathField) {
+    public static void copyFiles(DeviceType deviceType, AbstractConfig abstractConfig, String module, String targetPath, MaterialType materialType, JTextArea outputArea, JTextField excelPathField) {
         String excelPath = getExcelPath(outputArea, excelPathField);
+        String sourcePath = getSourcePath(excelPath, abstractConfig);
+        List<AbstractPart> parts = readLaserFilesFromExcel(excelPath, deviceType, abstractConfig, module).orElseGet(ArrayList::new);
 
-        List<AbstractPart> parts = readLaserFilesFromExcel(excelPath, abstractConfig, module).orElseGet(ArrayList::new);
-        String materialType = material.toString();
-        DriveType driveType = DriveType.valueOf(configOther.getDriveType());
+//        DriveType driveType = DriveType.valueOf(abstractConfig.getDriveType());
 
-        String sourcePath = getSourcePath(excelPath, configOther);
+
 
         List<AbstractPart> configParts = getFilesAccToConfig(deviceType, parts, driveType, materialType);
 
 
         File sourceFolder = new File(sourcePath);
-        File targetFolder = new File(folderPath);
+        File targetFolder = new File(targetPath);
 
         if (!sourceFolder.isDirectory() || !targetFolder.exists()) {
-            System.out.println("Source directory does not exist or target directory does not exist.");
+//            System.out.println("Source directory does not exist or target directory does not exist.");
             return;
         }
 

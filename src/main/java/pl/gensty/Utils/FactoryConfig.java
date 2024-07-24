@@ -10,14 +10,11 @@ import java.util.Map;
 
 public class FactoryConfig {
     public static AbstractConfig createConfig(DeviceType deviceType, Map<String, Object> params) {
-        switch (deviceType) {
-            case SPR:
+        return switch (deviceType) {
 //                return createConfigSPR(params);
-            case NPK:
-                return createConfigNPK(params);
-            default:
-                return createConfigOther(params);
-        }
+            case SPR, NPK -> createConfigNPK(params);
+            default -> createConfigOther(params);
+        };
     }
 
     private static ConfigSPR createConfigSPR(Map<String, Object> params) {
