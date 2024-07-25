@@ -11,23 +11,20 @@ import java.util.Map;
 public class FactoryConfig {
     public static AbstractConfig createConfig(DeviceType deviceType, Map<String, Object> params) {
         return switch (deviceType) {
-//                return createConfigSPR(params);
-            case SPR, NPK -> createConfigNPK(params);
+            case SPR -> createConfigSPR(params);
+            case NPK -> createConfigNPK(params);
             default -> createConfigOther(params);
         };
     }
 
     private static ConfigSPR createConfigSPR(Map<String, Object> params) {
         return new ConfigSPR.Builder()
-//                .order((String) params.get("order"))
-//                .type((String) params.get("type"))
-//                .size((String) params.get("size"))
-//                .material((String) params.get("material"))
-//                .deviceQuantity((Integer) params.get("deviceQuantity"))
-//                .height((Double) params.get("height"))
-//                .feetType((String) params.get("feetType"))
-//                .isVentingSegment((Boolean) params.get("isVentingSegment"))
-//                .isMaintenancePlatform((Boolean) params.get("isMaintenancePlatform"))
+                .order((String) params.get("order"))
+                .type((String) params.get("type"))
+                .size((String) params.get("size"))
+                .material((String) params.get("material"))
+                .deviceQuantity((Integer) params.get("deviceQuantity"))
+                .chainSupport((String) params.get("chainSupport"))
                 .build();
     }
 

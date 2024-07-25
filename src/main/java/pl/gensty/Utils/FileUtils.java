@@ -1,8 +1,7 @@
 package pl.gensty.Utils;
 
 import pl.gensty.Configuration.*;
-import pl.gensty.DevicePart.PartDriveType;
-import pl.gensty.DevicePart.AbstractPart;
+import pl.gensty.DevicePart.*;
 import pl.gensty.Enums.*;
 
 import javax.swing.*;
@@ -13,9 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import static pl.gensty.Utils.ExcelUtils.*;
 import static pl.gensty.Utils.PathUtils.*;
@@ -38,6 +35,7 @@ public class FileUtils {
             copyFiles(deviceType, abstractConfig, module, targetPath, MaterialType.SHEET, outputArea, excelPathField);
         }
     }
+
     private static List<String> deviceModules(AbstractConfig abstractConfig) {
         List<String> modules = new ArrayList<>();
         if (abstractConfig instanceof ConfigSPR) {
@@ -103,12 +101,8 @@ public class FileUtils {
         String sourcePath = getSourcePath(excelPath, abstractConfig);
         List<AbstractPart> parts = readLaserFilesFromExcel(excelPath, deviceType, abstractConfig, module).orElseGet(ArrayList::new);
 
-//        DriveType driveType = DriveType.valueOf(abstractConfig.getDriveType());
-
-
-
-        List<AbstractPart> configParts = getFilesAccToConfig(deviceType, parts, driveType, materialType);
-
+        List<AbstractPart> configParts = getFilesAccToFullConfig(abstractConfig, parts, materialType.toString());
+    //sprawdzić czy przenieść to do createFolder
 
         File sourceFolder = new File(sourcePath);
         File targetFolder = new File(targetPath);
@@ -131,10 +125,10 @@ public class FileUtils {
                 }
 
                 Path targetFilePath;
-                if (file.getName().endsWith("DWG") && file.getName().startsWith(part.numberEDT())) {
+                if (file.getName().endsWith("DWG") && file.getName().startsWith(part.getNumberEDT())) {
                     String configPartName = part.toString();
                     targetFilePath = Paths.get(targetFolder.getPath(), configPartName);
-                } else if (file.getName().endsWith("PDF") && file.getName().startsWith(part.numberEDT().substring(0, 16))) {
+                } else if (file.getName().endsWith("PDF") && file.getName().startsWith(part.getNumberEDT().substring(0, 16))) {
                     targetFilePath = Paths.get(targetFolder.getPath(), file.getName());
                 } else {
                     continue;
@@ -159,24 +153,77 @@ public class FileUtils {
         }
     }
 
-    private static List<AbstractPart> getFilesAccToConfig(DeviceType deviceType, List<AbstractPart> parts, DriveType driveType, String materialType) {
-        Map<DriveType, Predicate<AbstractPart>> filterMap = Map.of(
-                DriveType.ELEKTRYCZNY, PartDriveType::isElectric,
-                DriveType.PNEUMATYCZNY, PartDriveType::isPneumatic,
-                DriveType.RECZNY, PartDriveType::isManual
-        );
+    private static List<AbstractPart> getFilesAccToFullConfig(AbstractConfig abstractConfig, List<AbstractPart> parts, String materialType) {
+        List<AbstractPart> filteredByConfigParts = filterByConfig(abstractConfig, parts);
+        List<AbstractPart> filteredParts = filterByMaterial(filteredByConfigParts, materialType);
+        return filteredParts;
+    }
 
+    private static List<AbstractPart> filterByConfig(AbstractConfig abstractConfig, List<AbstractPart> parts) {
+        if (abstractConfig instanceof ConfigNPK) {
+            ConfigNPK configNPK = (ConfigNPK) abstractConfig;
 
+            return parts.stream()
+                    .filter(part -> {
+                        if (part instanceof PartFeet) {
+                            PartFeet partFeet = (PartFeet) part;
+                            return switch (configNPK.getFilling()) {
+                                case "ZJ" -> partFeet.filling1Way();
+                                case "ZD" -> partFeet.filling2Way();
+                                case "ZB" -> partFeet.fillingNoWay();
+                                default -> false;
+                            };
+                        }
+                        return false;
+                    })
+                    .toList();
+        } else if (abstractConfig instanceof ConfigSPR) {
+            ConfigSPR configSPR = (ConfigSPR) abstractConfig;
+
+            return parts.stream()
+                    .filter(part -> {
+                        if (part instanceof PartSPR) {
+                            PartSPR partSPR = (PartSPR) part;
+                            return switch (configSPR.getChainSupport()) {
+                                case "ROL" -> partSPR.rolls();
+                                case "GDS" -> partSPR.uppedDeck();
+                                case "GDT" -> partSPR.transportingUpperDeck();
+                                case "LPR" -> partSPR.guideBar();
+                                default -> false;
+                            };
+                        }
+                        return false;
+                    })
+                    .toList();
+        } else {
+            ConfigOther configOther = (ConfigOther) abstractConfig;
+
+            return parts.stream()
+                    .filter(part -> {
+                        if (part instanceof PartDriveType) {
+                            PartDriveType partDriveType = (PartDriveType) part;
+                            return switch (configOther.getDriveType()) {
+                                case "ELEKTRYCZNY" -> partDriveType.isElectric();
+                                case "PNEUMATYCZNY" -> partDriveType.isPneumatic();
+                                case "RECZNY" -> partDriveType.isManual();
+                                default -> false;
+                            };
+                        }
+                        return false;
+                    })
+                    .toList();
+        }
+    }
+
+    private static List<AbstractPart> filterByMaterial(List<AbstractPart> parts, String materialType) {
         if (MaterialType.SHEET.toString().equals(materialType)) {
             return parts.stream()
-                    .filter(filterMap.getOrDefault(driveType, part -> false))
                     .filter(part -> MaterialType.S235.toString().equals(part.getMaterial()) ||
                             MaterialType.DX51D.toString().equals(part.getMaterial()) ||
                             MaterialType.A304.toString().equals(part.getMaterial()))
                     .toList();
         } else {
             return parts.stream()
-                    .filter(filterMap.getOrDefault(driveType, part -> false))
                     .filter(part -> materialType.equals(part.getMaterial()))
                     .toList();
         }

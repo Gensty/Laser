@@ -53,31 +53,28 @@ public class DeviceCreator extends JFrame {
         setLaserButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                prepareLaser(config);
+                prepareLaser(deviceType, MaterialType.SHEET, outputArea,excelPathField,catalogPathField);
             }
         });
 
         setWaterButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String targetPath = createNewFolder(MaterialType.PE1000, outputArea, excelPathField, catalogPathField);
-                copyFiles(deviceType, targetPath, MaterialType.PE1000, outputArea, excelPathField);
+                prepareLaser(deviceType, MaterialType.PE1000, outputArea,excelPathField,catalogPathField);
             }
         });
 
         setPlexiButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String targetPath = createNewFolder(MaterialType.PLEXI, outputArea, excelPathField, catalogPathField);
-                copyFiles(deviceType, targetPath, MaterialType.PLEXI, outputArea, excelPathField);
+                prepareLaser(deviceType, MaterialType.PLEXI, outputArea,excelPathField,catalogPathField);
             }
         });
 
         setFilcButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String targetPath = createNewFolder(MaterialType.FILC, outputArea, excelPathField, catalogPathField);
-                copyFiles(deviceType, targetPath, MaterialType.FILC, outputArea, excelPathField);
+                prepareLaser(deviceType, MaterialType.FILC, outputArea,excelPathField,catalogPathField);
             }
         });
 

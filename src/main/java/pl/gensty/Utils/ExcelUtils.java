@@ -44,10 +44,12 @@ public class ExcelUtils {
 
             if (deviceType == DeviceType.NPK) {
                 String feetType = getCellStringValue(sheet.getRow(7).getCell(2), evaluator);
+                String filling = getCellStringValue(sheet.getRow(8).getCell(2), evaluator);
                 Boolean isVentingSegment = getCellBooleanValue(sheet.getRow(9).getCell(2), evaluator);
                 Boolean isMaintenancePlatform = getCellBooleanValue(sheet.getRow(10).getCell(2), evaluator);
 
                 params.put("feetType", feetType);
+                params.put("filling", filling);
                 params.put("isVentingSegment", isVentingSegment);
                 params.put("isMaintenancePlatform", isMaintenancePlatform);
             } else if (deviceType == DeviceType.SPR) {

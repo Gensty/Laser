@@ -2,18 +2,24 @@ package pl.gensty.Configuration;
 
 public class ConfigNPK extends AbstractConfig {
     private final String feetType;
+    private final String filling;
     private final Boolean isVentingSegment;
     private final Boolean isMaintenancePlatform;
 
     public ConfigNPK(Builder builder) {
         super(builder);
         this.feetType = builder.feetType;
+        this.filling = builder.filling;
         this.isVentingSegment = builder.isVentingSegment;
         this.isMaintenancePlatform = builder.isMaintenancePlatform;
     }
 
     public String getFeetType() {
         return feetType;
+    }
+
+    public String getFilling() {
+        return filling;
     }
 
     public Boolean isVentingSegment() {
@@ -26,11 +32,17 @@ public class ConfigNPK extends AbstractConfig {
 
     public static class Builder extends AbstractConfig.Builder<Builder> {
         private String feetType;
+        private String filling;
         private Boolean isVentingSegment;
         private Boolean isMaintenancePlatform;
 
         public Builder feetType(String feetType) {
             this.feetType = feetType;
+            return  this;
+        }
+
+        public Builder filling(String filling) {
+            this.filling = filling;
             return  this;
         }
 
@@ -55,6 +67,10 @@ public class ConfigNPK extends AbstractConfig {
 
             if (feetType == null) {
                 throw new NullPointerException("Typ stopy nie może być pusty! Sprawdź konfigurator Excel.");
+            }
+
+            if (filling == null) {
+                throw new NullPointerException("Rodzaj zasypu nie może być pusty! Sprawdź konfigurator Excel.");
             }
 
             if (isVentingSegment == null) {

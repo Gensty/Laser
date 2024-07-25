@@ -1,47 +1,23 @@
 package pl.gensty.Configuration;
 
 public class ConfigSPR extends AbstractConfig {
-    private final String feetType;
-    private final boolean isVentingSegment;
-    private final boolean isMaintenancePlatform;
+    private final String chainSupport;
 
     public ConfigSPR(Builder builder) {
         super(builder);
-        this.feetType = builder.feetType;
-        this.isVentingSegment = builder.isVentingSegment;
-        this.isMaintenancePlatform = builder.isMaintenancePlatform;
+        this.chainSupport = builder.chainSupport;
     }
 
-    public String getFeetType() {
-        return feetType;
-    }
-
-    public boolean isVentingSegment() {
-        return isVentingSegment;
-    }
-
-    public boolean isMaintenancePlatform() {
-        return isMaintenancePlatform;
+    public String getChainSupport() {
+        return chainSupport;
     }
 
     public static class Builder extends AbstractConfig.Builder<Builder> {
-        private String feetType;
-        private Boolean isVentingSegment;
-        private Boolean isMaintenancePlatform;
+        private String chainSupport;
 
-        public Builder feetType(String feetType) {
-            this.feetType = feetType;
+        public Builder chainSupport(String feetType) {
+            this.chainSupport = feetType;
             return  this;
-        }
-
-        public Builder isVentingSegment(Boolean isVentingSegment) {
-            this.isVentingSegment = isVentingSegment;
-            return  this;
-        }
-
-        public Builder isMaintenancePlatform(Boolean isMaintenancePlatform) {
-            this.isMaintenancePlatform = isMaintenancePlatform;
-            return this;
         }
 
         @Override
@@ -53,8 +29,8 @@ public class ConfigSPR extends AbstractConfig {
         public ConfigSPR build() {
             validate();
 
-            if (feetType == null) {
-                throw new NullPointerException("Typ stopy nie może być pusty! Sprawdź konfigurator Excel.");
+            if (chainSupport == null) {
+                throw new NullPointerException("Prowadzenie łańcucha nie może być puste! Sprawdź konfigurator Excel.");
             }
             return new ConfigSPR(this);
         }
