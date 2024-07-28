@@ -49,32 +49,33 @@ public class DeviceCreator extends JFrame {
         JButton undoButton = new JButton("Cofnij do wyboru urządzeń");
         undoButton.setPreferredSize(new Dimension(410,30));
 
+        DeviceType deviceTypeShort = getDeviceTypeOther(deviceType);
 
         setLaserButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                prepareLaser(deviceType, MaterialType.SHEET, outputArea,excelPathField,catalogPathField);
+                prepareLaser(deviceTypeShort, MaterialType.SHEET, outputArea,excelPathField,catalogPathField);
             }
         });
 
         setWaterButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                prepareLaser(deviceType, MaterialType.PE1000, outputArea,excelPathField,catalogPathField);
+                prepareLaser(deviceTypeShort, MaterialType.PE1000, outputArea,excelPathField,catalogPathField);
             }
         });
 
         setPlexiButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                prepareLaser(deviceType, MaterialType.PLEXI, outputArea,excelPathField,catalogPathField);
+                prepareLaser(deviceTypeShort, MaterialType.PLEXI, outputArea,excelPathField,catalogPathField);
             }
         });
 
         setFilcButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                prepareLaser(deviceType, MaterialType.FILC, outputArea,excelPathField,catalogPathField);
+                prepareLaser(deviceTypeShort, MaterialType.FILC, outputArea,excelPathField,catalogPathField);
             }
         });
 
@@ -133,5 +134,13 @@ public class DeviceCreator extends JFrame {
 
         add(panel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private static DeviceType getDeviceTypeOther(DeviceType deviceType) {
+        if (deviceType == DeviceType.ZASUWA || deviceType == DeviceType.ROZDZIELACZ) {
+            return DeviceType.OTHER;
+        } else {
+            return deviceType;
+        }
     }
 }

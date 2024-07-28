@@ -5,8 +5,8 @@ import static pl.gensty.Utils.NumberUtils.isSingleCharNumber;
 public abstract class AbstractPart {
     public final String numberEDT;
     public final String material;
-    public final Integer thickness;
-    public final Integer quantity;
+    public final int thickness;
+    public final int quantity;
     public final String description;
 
     public AbstractPart(Builder<?> builder) {
@@ -25,11 +25,11 @@ public abstract class AbstractPart {
         return material;
     }
 
-    public Integer getThickness() {
+    public int getThickness() {
         return thickness;
     }
 
-    public Integer getQuantity() {
+    public int getQuantity() {
         return quantity;
     }
 
@@ -49,8 +49,8 @@ public abstract class AbstractPart {
     public static abstract class Builder<T extends Builder<T>> {
         private String numberEDT;
         private String material;
-        private Integer thickness;
-        private Integer quantity;
+        private int thickness;
+        private int quantity;
         private String description;
 
         public T numberEDT(String numberEDT) {
@@ -63,12 +63,12 @@ public abstract class AbstractPart {
             return self();
         }
 
-        public T thickness(Integer thickness) {
+        public T thickness(int thickness) {
             this.thickness = thickness;
             return self();
         }
 
-        public T quantity(Integer quantity) {
+        public T quantity(int quantity) {
             this.quantity = quantity;
             return self();
         }
@@ -89,12 +89,12 @@ public abstract class AbstractPart {
             if (material == null) {
                 throw new NullPointerException("Powłoka nie może być pusta! Sprawdź konfigurator Excel.");
             }
-            if (thickness == null) {
-                throw new NullPointerException("Grubość nie może być pusta! Sprawdź konfigurator Excel.");
-            }
-            if (quantity == null) {
-                throw new NullPointerException("Ilość elementów nie może być pusta! Sprawdź konfigurator Excel.");
-            }
+//            if (thickness == null) {
+//                throw new NullPointerException("Grubość nie może być pusta! Sprawdź konfigurator Excel.");
+//            }
+//            if (quantity == null) {
+//                throw new NullPointerException("Ilość elementów nie może być pusta! Sprawdź konfigurator Excel.");
+//            }
             if (description == null) {
                 throw new NullPointerException("Opis elementu nie może być pusty! Sprawdź konfigurator Excel.");
             }

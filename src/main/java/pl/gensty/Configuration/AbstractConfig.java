@@ -40,11 +40,11 @@ public abstract class AbstractConfig {
     }
 
     public String setFolderName() {
-        return "ZL_" + order + " - " + size  + "module" + "_" + material + " (x" + isSingleCharNumber(deviceQuantity) + ")";
+        return "ZL_" + order + " - " + size + "_" + "module" + material + " (x" + isSingleCharNumber(deviceQuantity) + ")";
     }
 
     public String setFolderName(MaterialType materialType) {
-        return "ZL_" + order + " - " + size + "module" + "_" + materialType.toString() + " (x" + isSingleCharNumber(deviceQuantity) + ")";
+        return "ZL_" + order + " - " + size + "_" + "module" + materialType.toString() + " (x" + isSingleCharNumber(deviceQuantity) + ")";
     }
 
     public static abstract class Builder<T extends Builder<T>> {

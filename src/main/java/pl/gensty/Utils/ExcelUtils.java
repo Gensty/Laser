@@ -92,7 +92,7 @@ public class ExcelUtils {
             Sheet sheet = workbook.getSheet(module);
 
             for (Row row : sheet) {
-                if (row.getRowNum() < 9) {
+                if (row.getRowNum() < 10) {
                     continue;
                 }
                 Cell cell = row.getCell(0);
@@ -169,7 +169,7 @@ public class ExcelUtils {
             Workbook workbook = new XSSFWorkbook(fis);
             FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 
-            Sheet sheet = workbook.getSheet("Path");
+            Sheet sheet = workbook.getSheet("DataPath");
 
             for (Row row : sheet) {
                 if (row.getRowNum() == 0) {
@@ -208,12 +208,14 @@ public class ExcelUtils {
         }
     }
 
-    private static Integer getCellIntValue(Cell cell, FormulaEvaluator evaluator) {
+    private static int getCellIntValue(Cell cell, FormulaEvaluator evaluator) {
         if (cell.getCellType() == CellType.BLANK) {
             throw new IllegalArgumentException("Sprawdź czy któraś z komórek w konfiguratorze Excel nie jest pusta.");
         }
 
         if (cell.getCellType() == CellType.FORMULA) {
+            return (int) evaluator.evaluate(cell).getNumberValue();
+        } else if (cell.getCellType() == CellType.STRING){
             return (int) evaluator.evaluate(cell).getNumberValue();
         } else {
             return (int) cell.getNumericCellValue();
@@ -236,5 +238,9 @@ public class ExcelUtils {
 
         includeFile = value.equals("X");
         return includeFile;
+    }
+
+    private static String getCellType(Cell cell, FormulaEvaluator evaluator) {
+        return cell.getCellType().toString();
     }
 }

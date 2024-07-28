@@ -31,8 +31,9 @@ public class FileUtils {
         List<String> modules = deviceModules(abstractConfig);
 
         for (String module : modules) {
-            String targetPath = createNewFolder(abstractConfig, module, materialType, outputArea, excelPathField, catalogPathField);
-            copyFiles(deviceType, abstractConfig, module, targetPath, MaterialType.SHEET, outputArea, excelPathField);
+            String targetPath = createNewFolder(abstractConfig, module, materialType, outputArea, catalogPathField);
+            copyFiles(deviceType, abstractConfig, module, targetPath, materialType, outputArea, excelPathField);
+            deleteFolder(targetPath, outputArea);
         }
     }
 
@@ -67,12 +68,11 @@ public class FileUtils {
         return modules;
     }
 
-    public static String createNewFolder(AbstractConfig abstractConfig, String module, MaterialType materialType, JTextArea outputArea, JTextField excelPathField, JTextField catalogPathField) {
+    public static String createNewFolder(AbstractConfig abstractConfig, String module, MaterialType materialType, JTextArea outputArea, JTextField catalogPathField) {
         String targetPath = getTargetPath(outputArea, catalogPathField);
 
         String folderName;
-        String replacement = (materialType == MaterialType.SHEET) ? "" : "_";
-        replacement = (abstractConfig instanceof ConfigNPK || abstractConfig instanceof ConfigSPR) ? replacement + module : replacement;
+        String replacement = (abstractConfig instanceof ConfigNPK || abstractConfig instanceof ConfigSPR) ? module + "_" : "";
 
         if (materialType == MaterialType.SHEET) {
             folderName = abstractConfig.setFolderName().replace("module", replacement);
@@ -85,7 +85,7 @@ public class FileUtils {
         File newFolder = new File(folderPath);
         if (!newFolder.exists()) {
             if (newFolder.mkdir()) {
-                outputArea.append("Folder utworzony: " + folderPath + "\n");
+                outputArea.append("\n" + "Folder utworzony: " + folderPath + "\n");
             } else {
                 outputArea.append("Nie udało się utworzyć folderu: " + folderPath);
             }
@@ -102,7 +102,6 @@ public class FileUtils {
         List<AbstractPart> parts = readLaserFilesFromExcel(excelPath, deviceType, abstractConfig, module).orElseGet(ArrayList::new);
 
         List<AbstractPart> configParts = getFilesAccToFullConfig(abstractConfig, parts, materialType.toString());
-    //sprawdzić czy przenieść to do createFolder
 
         File sourceFolder = new File(sourcePath);
         File targetFolder = new File(targetPath);
@@ -120,22 +119,59 @@ public class FileUtils {
 
         for (AbstractPart part : configParts) {
             for (File file : files) {
-                if (!file.isFile()) {
-                    continue;
-                }
+                if (!file.isFile()) continue;
 
                 Path targetFilePath;
+                int signs = part.getNumberEDT().startsWith("ZM") ? 13 : 16;
+//                if (file.getName().endsWith("PDF")) {
+//                    if (file.getName().startsWith("ZM") && file.getName().startsWith(part.getNumberEDT().substring(0, 13))) {
+//                        targetFilePath = Paths.get(targetFolder.getPath(), file.getName());
+//                    } else if (!file.getName().startsWith("ZM") && file.getName().startsWith(part.getNumberEDT().substring(0, 16))){
+//                        targetFilePath = Paths.get(targetFolder.getPath(), file.getName());
+//                    } else {
+//                        continue;
+//                    }
+//                } else if (file.getName().endsWith("DWG") && file.getName().startsWith(part.getNumberEDT())) {
+//                    String configPartName = part.toString();
+//                    targetFilePath = Paths.get(targetFolder.getPath(), configPartName);
+//                } else {
+//                    continue;
+//                }
+
                 if (file.getName().endsWith("DWG") && file.getName().startsWith(part.getNumberEDT())) {
                     String configPartName = part.toString();
                     targetFilePath = Paths.get(targetFolder.getPath(), configPartName);
-                } else if (file.getName().endsWith("PDF") && file.getName().startsWith(part.getNumberEDT().substring(0, 16))) {
+                } else if (file.getName().endsWith("PDF") && file.getName().startsWith(part.getNumberEDT().substring(0, signs))) {
                     targetFilePath = Paths.get(targetFolder.getPath(), file.getName());
                 } else {
                     continue;
                 }
 
+//                if (file.getName().endsWith("DWG") && file.getName().startsWith(part.getNumberEDT())) {
+//                    String configPartName = part.toString();
+//                    targetFilePath = Paths.get(targetFolder.getPath(), configPartName);
+//                } else if (file.getName().endsWith("PDF") && file.getName().startsWith("ZM")) {
+//                    if (file.getName().startsWith(part.getNumberEDT().substring(0, signs)))
+//                    targetFilePath = Paths.get(targetFolder.getPath(), file.getName());
+//                } else {
+//                    continue;
+//                }
                 copyFile(file, targetFilePath, outputArea);
             }
+        }
+    }
+
+    public static void deleteFolder(String folderPath, JTextArea outputArea) {
+        File folder = new File(folderPath);
+
+        if (folder.isDirectory() && folder.list().length == 0) {
+            if (folder.delete()) {
+                outputArea.append("Pusty folder usunięty: " + folderPath + "\n");
+            } else {
+                outputArea.append("Nie udało się usunąć folderu: " + folderPath + "\n");
+            }
+        } else {
+            outputArea.append("\n");
         }
     }
 
@@ -155,18 +191,23 @@ public class FileUtils {
 
     private static List<AbstractPart> getFilesAccToFullConfig(AbstractConfig abstractConfig, List<AbstractPart> parts, String materialType) {
         List<AbstractPart> filteredByConfigParts = filterByConfig(abstractConfig, parts);
-        List<AbstractPart> filteredParts = filterByMaterial(filteredByConfigParts, materialType);
-        return filteredParts;
+        List<AbstractPart> filteredByMaterial = filterByMaterial(filteredByConfigParts, materialType);
+
+        if (MaterialType.A304.toString().equals(abstractConfig.getMaterial())) {
+            return filteredByMaterial;
+        } else {
+            return filteredByMaterial.stream()
+                    .filter(part -> !part.getNumberEDT().startsWith("ZM"))
+                    .toList();
+        }
     }
 
     private static List<AbstractPart> filterByConfig(AbstractConfig abstractConfig, List<AbstractPart> parts) {
-        if (abstractConfig instanceof ConfigNPK) {
-            ConfigNPK configNPK = (ConfigNPK) abstractConfig;
+        if (abstractConfig instanceof ConfigNPK configNPK) {
 
             return parts.stream()
                     .filter(part -> {
-                        if (part instanceof PartFeet) {
-                            PartFeet partFeet = (PartFeet) part;
+                        if (part instanceof PartFeet partFeet) {
                             return switch (configNPK.getFilling()) {
                                 case "ZJ" -> partFeet.filling1Way();
                                 case "ZD" -> partFeet.filling2Way();
@@ -177,13 +218,11 @@ public class FileUtils {
                         return false;
                     })
                     .toList();
-        } else if (abstractConfig instanceof ConfigSPR) {
-            ConfigSPR configSPR = (ConfigSPR) abstractConfig;
+        } else if (abstractConfig instanceof ConfigSPR configSPR) {
 
             return parts.stream()
                     .filter(part -> {
-                        if (part instanceof PartSPR) {
-                            PartSPR partSPR = (PartSPR) part;
+                        if (part instanceof PartSPR partSPR) {
                             return switch (configSPR.getChainSupport()) {
                                 case "ROL" -> partSPR.rolls();
                                 case "GDS" -> partSPR.uppedDeck();
@@ -200,8 +239,7 @@ public class FileUtils {
 
             return parts.stream()
                     .filter(part -> {
-                        if (part instanceof PartDriveType) {
-                            PartDriveType partDriveType = (PartDriveType) part;
+                        if (part instanceof PartDriveType partDriveType) {
                             return switch (configOther.getDriveType()) {
                                 case "ELEKTRYCZNY" -> partDriveType.isElectric();
                                 case "PNEUMATYCZNY" -> partDriveType.isPneumatic();

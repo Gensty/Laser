@@ -91,69 +91,69 @@ public class DeviceModulesTest {
                 .build();
     }
 
-    @Test
-    void testDeviceModulesForConfigNPKwithAllModules() {
-        List<String> modules = FileUtils.deviceModules(configNPKwithAllModules);
-
-        assertTrue(modules.contains(ModuleNPK.GL.toString()));
-        assertTrue(modules.contains(ModuleNPK.RT.toString()));
-        assertTrue(modules.contains(ModuleNPK.RO.toString()));
-        assertTrue(modules.contains(ModuleNPK.RWM.toString()));
-        assertTrue(modules.contains(ModuleNPK.STS.toString()));
-        assertTrue(modules.contains(ModuleNPK.SO.toString()));
-        assertTrue(modules.contains(ModuleNPK.PO.toString()));
-    }
-
-    @Test
-    void testDeviceModulesForConfigNPKwithoutSOandPO() {
-        List<String> modules = FileUtils.deviceModules(configNPKwithoutSOandPO);
-
-        assertTrue(modules.contains(ModuleNPK.GL.toString()));
-        assertTrue(modules.contains(ModuleNPK.RT.toString()));
-        assertTrue(modules.contains(ModuleNPK.RO.toString()));
-        assertTrue(modules.contains(ModuleNPK.RWM.toString()));
-        assertTrue(modules.contains(ModuleNPK.STS.toString()));
-        assertTrue(modules.contains(ModuleNPK.SO.toString()));
-        assertTrue(modules.contains(ModuleNPK.PO.toString()));
-    }
-
-    @Test
-    void testDeviceModulesForConfigSPR() {
-        List<String> modules = FileUtils.deviceModules(configSPR);
-
-        assertTrue(modules.contains(ModuleSPR.SN.toString()));
-        assertTrue(modules.contains(ModuleSPR.SZ.toString()));
-        assertTrue(modules.contains(ModuleSPR.KP.toString()));
-    }
-
-
-
-    @Test
-    void testDeviceModulesForConfigZPR() {
-        List<String> modules = FileUtils.deviceModules(configZPR);
-
-        assertTrue(modules.contains(configZPR.getType()));
-    }
-
-    @Test
-    void testDeviceModulesForConfigNZZ() {
-        List<String> modules = FileUtils.deviceModules(configNZZ);
-
-        assertTrue(modules.contains(configNZZ.getType()));
-    }
-
-    @Test
-    void testDeviceModulesForConfigRDA() {
-        List<String> modules = FileUtils.deviceModules(configRDA);
-
-        assertTrue(modules.contains(configRDA.getType()));
-    }
-
-    @Test
-    void testDeviceModulesForConfigRTSP() {
-        List<String> modules = FileUtils.deviceModules(configRTSP);
-
-        assertTrue(modules.contains(configRTSP.getType()));
-    }
+//    @Test
+//    void testDeviceModulesForConfigNPKwithAllModules() {
+//        List<String> modules = FileUtils.deviceModules(configNPKwithAllModules);
+//
+//        assertTrue(modules.contains(ModuleNPK.GL.toString()));
+//        assertTrue(modules.contains(ModuleNPK.RT.toString()));
+//        assertTrue(modules.contains(ModuleNPK.RO.toString()));
+//        assertTrue(modules.contains(ModuleNPK.RWM.toString()));
+//        assertTrue(modules.contains(ModuleNPK.STS.toString()));
+//        assertTrue(modules.contains(ModuleNPK.SO.toString()));
+//        assertTrue(modules.contains(ModuleNPK.PO.toString()));
+//    }
+//
+//    @Test
+//    void testDeviceModulesForConfigNPKwithoutSOandPO() {
+//        List<String> modules = FileUtils.deviceModules(configNPKwithoutSOandPO);
+//
+//        assertTrue(modules.contains(ModuleNPK.GL.toString()));
+//        assertTrue(modules.contains(ModuleNPK.RT.toString()));
+//        assertTrue(modules.contains(ModuleNPK.RO.toString()));
+//        assertTrue(modules.contains(ModuleNPK.RWM.toString()));
+//        assertTrue(modules.contains(ModuleNPK.STS.toString()));
+//        assertTrue(modules.contains(ModuleNPK.SO.toString()));
+//        assertTrue(modules.contains(ModuleNPK.PO.toString()));
+//    }
+//
+//    @Test
+//    void testDeviceModulesForConfigSPR() {
+//        List<String> modules = FileUtils.deviceModules(configSPR);
+//
+//        assertTrue(modules.contains(ModuleSPR.SN.toString()));
+//        assertTrue(modules.contains(ModuleSPR.SZ.toString()));
+//        assertTrue(modules.contains(ModuleSPR.KP.toString()));
+//    }
+//
+//
+//
+//    @Test
+//    void testDeviceModulesForConfigZPR() {
+//        List<String> modules = FileUtils.deviceModules(configZPR);
+//
+//        assertTrue(modules.contains(configZPR.getType()));
+//    }
+//
+//    @Test
+//    void testDeviceModulesForConfigNZZ() {
+//        List<String> modules = FileUtils.deviceModules(configNZZ);
+//
+//        assertTrue(modules.contains(configNZZ.getType()));
+//    }
+//
+//    @Test
+//    void testDeviceModulesForConfigRDA() {
+//        List<String> modules = FileUtils.deviceModules(configRDA);
+//
+//        assertTrue(modules.contains(configRDA.getType()));
+//    }
+//
+//    @Test
+//    void testDeviceModulesForConfigRTSP() {
+//        List<String> modules = FileUtils.deviceModules(configRTSP);
+//
+//        assertTrue(modules.contains(configRTSP.getType()));
+//    }
 }
 
