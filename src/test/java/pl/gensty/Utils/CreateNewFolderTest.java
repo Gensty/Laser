@@ -36,7 +36,7 @@ public class CreateNewFolderTest {
     public void testCreateNewFolderConfigNPK() {
         when(configNPK.setFolderName()).thenReturn("moduleFolder");
 
-        String result = FileUtils.createNewFolder(configNPK, "testModule", MaterialType.SHEET, outputArea, excelPathField, catalogPathField);
+        String result = FileUtils.createNewFolder(configNPK, "testModule", MaterialType.SHEET, outputArea, catalogPathField);
 
         assertTrue(result.contains("test/catalog/moduleFolder-testModule"));
         assertTrue(new File(result).exists());
@@ -61,7 +61,7 @@ public class CreateNewFolderTest {
 
         when(abstractConfig.setFolderName()).thenReturn("existingFolder");
 
-        String result = FileUtils.createNewFolder(abstractConfig, "testModule", MaterialType.SHEET, outputArea, excelPathField, catalogPathField);
+        String result = FileUtils.createNewFolder(abstractConfig, "testModule", MaterialType.SHEET, outputArea, catalogPathField);
 
         assertTrue(result.contains("test/catalog/existingFolder"));
         assertTrue(outputArea.getText().contains("Folder o nazwie existingFolder już istnieje."));

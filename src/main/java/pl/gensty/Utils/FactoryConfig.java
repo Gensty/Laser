@@ -36,6 +36,7 @@ public class FactoryConfig {
                 .material((String) params.get("material"))
                 .deviceQuantity((Integer) params.get("deviceQuantity"))
                 .feetType((String) params.get("feetType"))
+                .filling((String) params.get("filling"))
                 .isVentingSegment((Boolean) params.get("isVentingSegment"))
                 .isMaintenancePlatform((Boolean) params.get("isMaintenancePlatform"))
                 .build();

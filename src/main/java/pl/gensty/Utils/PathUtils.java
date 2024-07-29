@@ -1,6 +1,8 @@
 package pl.gensty.Utils;
 
 import pl.gensty.Configuration.AbstractConfig;
+import pl.gensty.Configuration.ConfigNPK;
+import pl.gensty.Configuration.ConfigSPR;
 
 import javax.swing.*;
 
@@ -27,9 +29,16 @@ public class PathUtils {
         return excelPath;
     }
 
-    public static String getSourcePath(String excelPath, AbstractConfig abstractConfig) {
+    public static String getSourcePath(String excelPath, AbstractConfig abstractConfig, String module) {
+        String sourcePath;
+        if (abstractConfig instanceof ConfigSPR || abstractConfig instanceof ConfigNPK) {
+            sourcePath = abstractConfig.getSize() + "-" + module;
+        } else {
+            sourcePath = abstractConfig.getSize();
+        }
+
         return readPathFromExcel(excelPath)
-                .flatMap(paths -> Optional.ofNullable(paths.get(abstractConfig.getSize())))
+                .flatMap(paths -> Optional.ofNullable(paths.get(sourcePath)))
                 .orElseThrow(() -> new IllegalArgumentException("Nie udało się znaleźć ścieżki dla podanego typu i rozmiaru w pliku Excel."));
     }
 }

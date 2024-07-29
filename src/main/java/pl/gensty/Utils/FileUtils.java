@@ -46,21 +46,21 @@ public class FileUtils {
         } else if (abstractConfig instanceof ConfigNPK) {
             modules.add(ModuleNPK.GL.toString());
             modules.add(ModuleNPK.RT.toString());
-            modules.add(ModuleNPK.RO.toString());
-            modules.add(ModuleNPK.RWM.toString());
-
-            if (ModuleNPK.STS.toString().equals(((ConfigNPK) abstractConfig).getFeetType())) {
-                modules.add(ModuleNPK.STS.toString());
-            } else {
-                modules.add(ModuleNPK.STZ.toString());
-            }
-
-            if (((ConfigNPK) abstractConfig).isVentingSegment()) {
-                modules.add(ModuleNPK.SO.toString());
-            }
-            if (((ConfigNPK) abstractConfig).isMaintenancePlatform()) {
-                modules.add(ModuleNPK.PO.toString());
-            }
+//            modules.add(ModuleNPK.RO.toString());
+//            modules.add(ModuleNPK.RWM.toString());
+//
+//            if (ModuleNPK.STS.toString().equals(((ConfigNPK) abstractConfig).getFeetType())) {
+//                modules.add(ModuleNPK.STS.toString());
+//            } else {
+//                modules.add(ModuleNPK.STZ.toString());
+//            }
+//
+//            if (((ConfigNPK) abstractConfig).isVentingSegment()) {
+//                modules.add(ModuleNPK.SO.toString());
+//            }
+//            if (((ConfigNPK) abstractConfig).isMaintenancePlatform()) {
+//                modules.add(ModuleNPK.PO.toString());
+//            }
         } else {
             modules.add(abstractConfig.getType());
         }
@@ -72,7 +72,7 @@ public class FileUtils {
         String targetPath = getTargetPath(outputArea, catalogPathField);
 
         String folderName;
-        String replacement = (abstractConfig instanceof ConfigNPK || abstractConfig instanceof ConfigSPR) ? module + "_" : "";
+        String replacement = (abstractConfig instanceof ConfigNPK || abstractConfig instanceof ConfigSPR) ? "_" + module + " " : " ";
 
         if (materialType == MaterialType.SHEET) {
             folderName = abstractConfig.setFolderName().replace("module", replacement);
@@ -98,7 +98,7 @@ public class FileUtils {
 
     public static void copyFiles(DeviceType deviceType, AbstractConfig abstractConfig, String module, String targetPath, MaterialType materialType, JTextArea outputArea, JTextField excelPathField) {
         String excelPath = getExcelPath(outputArea, excelPathField);
-        String sourcePath = getSourcePath(excelPath, abstractConfig);
+        String sourcePath = getSourcePath(excelPath, abstractConfig, module);
         List<AbstractPart> parts = readLaserFilesFromExcel(excelPath, deviceType, abstractConfig, module).orElseGet(ArrayList::new);
 
         List<AbstractPart> configParts = getFilesAccToFullConfig(abstractConfig, parts, materialType.toString());
@@ -123,20 +123,6 @@ public class FileUtils {
 
                 Path targetFilePath;
                 int signs = part.getNumberEDT().startsWith("ZM") ? 13 : 16;
-//                if (file.getName().endsWith("PDF")) {
-//                    if (file.getName().startsWith("ZM") && file.getName().startsWith(part.getNumberEDT().substring(0, 13))) {
-//                        targetFilePath = Paths.get(targetFolder.getPath(), file.getName());
-//                    } else if (!file.getName().startsWith("ZM") && file.getName().startsWith(part.getNumberEDT().substring(0, 16))){
-//                        targetFilePath = Paths.get(targetFolder.getPath(), file.getName());
-//                    } else {
-//                        continue;
-//                    }
-//                } else if (file.getName().endsWith("DWG") && file.getName().startsWith(part.getNumberEDT())) {
-//                    String configPartName = part.toString();
-//                    targetFilePath = Paths.get(targetFolder.getPath(), configPartName);
-//                } else {
-//                    continue;
-//                }
 
                 if (file.getName().endsWith("DWG") && file.getName().startsWith(part.getNumberEDT())) {
                     String configPartName = part.toString();
@@ -147,15 +133,6 @@ public class FileUtils {
                     continue;
                 }
 
-//                if (file.getName().endsWith("DWG") && file.getName().startsWith(part.getNumberEDT())) {
-//                    String configPartName = part.toString();
-//                    targetFilePath = Paths.get(targetFolder.getPath(), configPartName);
-//                } else if (file.getName().endsWith("PDF") && file.getName().startsWith("ZM")) {
-//                    if (file.getName().startsWith(part.getNumberEDT().substring(0, signs)))
-//                    targetFilePath = Paths.get(targetFolder.getPath(), file.getName());
-//                } else {
-//                    continue;
-//                }
                 copyFile(file, targetFilePath, outputArea);
             }
         }
@@ -204,52 +181,50 @@ public class FileUtils {
 
     private static List<AbstractPart> filterByConfig(AbstractConfig abstractConfig, List<AbstractPart> parts) {
         if (abstractConfig instanceof ConfigNPK configNPK) {
-
-            return parts.stream()
-                    .filter(part -> {
-                        if (part instanceof PartFeet partFeet) {
-                            return switch (configNPK.getFilling()) {
-                                case "ZJ" -> partFeet.filling1Way();
-                                case "ZD" -> partFeet.filling2Way();
-                                case "ZB" -> partFeet.fillingNoWay();
-                                default -> false;
-                            };
-                        }
-                        return false;
-                    })
-                    .toList();
+            if (parts.getFirst() instanceof PartFeet partFeet) {
+                return parts.stream()
+                        .filter(part -> switch (configNPK.getFilling()) {
+                            case "ZJ" -> partFeet.filling1Way();
+                            case "ZD" -> partFeet.filling2Way();
+                            case "ZB" -> partFeet.fillingNoWay();
+                            default -> false;
+                        })
+                        .toList();
+            } else if (parts.getFirst() instanceof Part) {
+                return parts;
+            } else {
+                return parts;
+            }
         } else if (abstractConfig instanceof ConfigSPR configSPR) {
-
-            return parts.stream()
-                    .filter(part -> {
-                        if (part instanceof PartSPR partSPR) {
-                            return switch (configSPR.getChainSupport()) {
-                                case "ROL" -> partSPR.rolls();
-                                case "GDS" -> partSPR.uppedDeck();
-                                case "GDT" -> partSPR.transportingUpperDeck();
-                                case "LPR" -> partSPR.guideBar();
-                                default -> false;
-                            };
-                        }
-                        return false;
-                    })
-                    .toList();
+            if (parts.getFirst() instanceof PartSPR partSPR) {
+                return parts.stream()
+                        .filter(part -> switch (configSPR.getChainSupport()) {
+                            case "ROL" -> partSPR.rolls();
+                            case "GDS" -> partSPR.uppedDeck();
+                            case "GDT" -> partSPR.transportingUpperDeck();
+                            case "LPR" -> partSPR.guideBar();
+                            default -> false;
+                        })
+                        .toList();
+            } else {
+                return parts;
+            }
         } else {
             ConfigOther configOther = (ConfigOther) abstractConfig;
 
-            return parts.stream()
-                    .filter(part -> {
-                        if (part instanceof PartDriveType partDriveType) {
-                            return switch (configOther.getDriveType()) {
-                                case "ELEKTRYCZNY" -> partDriveType.isElectric();
-                                case "PNEUMATYCZNY" -> partDriveType.isPneumatic();
-                                case "RECZNY" -> partDriveType.isManual();
-                                default -> false;
-                            };
-                        }
-                        return false;
-                    })
-                    .toList();
+            if (parts.getFirst() instanceof PartDriveType partDriveType) {
+                return parts.stream()
+                        .filter(part -> switch (configOther.getDriveType()) {
+                            case "ELEKTRYCZNY" -> partDriveType.isElectric();
+                            case "PNEUMATYCZNY" -> partDriveType.isPneumatic();
+                            case "RECZNY" -> partDriveType.isManual();
+                            default -> false;
+                        })
+                        .toList();
+
+            } else {
+                return parts;
+            }
         }
     }
 

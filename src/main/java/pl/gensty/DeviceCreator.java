@@ -137,10 +137,16 @@ public class DeviceCreator extends JFrame {
     }
 
     private static DeviceType getDeviceTypeOther(DeviceType deviceType) {
-        if (deviceType == DeviceType.ZASUWA || deviceType == DeviceType.ROZDZIELACZ) {
-            return DeviceType.OTHER;
-        } else {
-            return deviceType;
+        switch (deviceType) {
+            case REDLER -> {
+                return DeviceType.SPR;
+            }
+            case PODNOSNIK -> {
+                return DeviceType.NPK;
+            }
+            default -> {
+                return DeviceType.OTHER;
+            }
         }
     }
 }
