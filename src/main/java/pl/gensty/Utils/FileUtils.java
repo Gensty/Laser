@@ -37,7 +37,7 @@ public class FileUtils {
         }
     }
 
-    private static List<String> deviceModules(AbstractConfig abstractConfig) {
+    static List<String> deviceModules(AbstractConfig abstractConfig) {
         List<String> modules = new ArrayList<>();
         if (abstractConfig instanceof ConfigSPR) {
             modules.add(ModuleSPR.SN.toString());
