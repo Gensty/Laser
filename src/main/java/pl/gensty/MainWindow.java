@@ -1,6 +1,6 @@
 package pl.gensty;
 
-import pl.gensty.Enums.DeviceType;
+import pl.gensty.enums.DeviceType;
 
 import javax.swing.*;
 import java.awt.*;

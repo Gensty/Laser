@@ -1,14 +1,11 @@
 package pl.gensty;
 
-import pl.gensty.Enums.DeviceType;
-import pl.gensty.Enums.MaterialType;
+import pl.gensty.enums.DeviceType;
+import pl.gensty.enums.MaterialType;
+import pl.gensty.manager.PackageManager;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import static pl.gensty.Utils.FileUtils.*;
-
 
 public class DeviceCreator extends JFrame {
     private final JTextField catalogPathField;
@@ -49,42 +46,20 @@ public class DeviceCreator extends JFrame {
         JButton undoButton = new JButton("Cofnij do wyboru urządzeń");
         undoButton.setPreferredSize(new Dimension(410,30));
 
-        DeviceType deviceTypeShort = getDeviceTypeOther(deviceType);
+        DeviceType deviceTypeShort = getDeviceType(deviceType);
 
-        setLaserButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                prepareLaser(deviceTypeShort, MaterialType.SHEET, outputArea,excelPathField,catalogPathField);
-            }
-        });
+        setLaserButton.addActionListener(e -> PackageManager.preparePackage(deviceTypeShort, MaterialType.SHEET, outputArea,excelPathField,catalogPathField));
 
-        setWaterButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                prepareLaser(deviceTypeShort, MaterialType.PE1000, outputArea,excelPathField,catalogPathField);
-            }
-        });
+        setWaterButton.addActionListener(e -> PackageManager.preparePackage(deviceTypeShort, MaterialType.PE1000, outputArea,excelPathField,catalogPathField));
 
-        setPlexiButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                prepareLaser(deviceTypeShort, MaterialType.PLEXI, outputArea,excelPathField,catalogPathField);
-            }
-        });
+        setPlexiButton.addActionListener(e -> PackageManager.preparePackage(deviceTypeShort, MaterialType.PLEXI, outputArea,excelPathField,catalogPathField));
 
-        setFilcButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                prepareLaser(deviceTypeShort, MaterialType.FILC, outputArea,excelPathField,catalogPathField);
-            }
-        });
+        setFilcButton.addActionListener(e -> PackageManager.preparePackage(deviceTypeShort, MaterialType.FILC, outputArea,excelPathField,catalogPathField));
 
-        undoButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                MainWindow mainWindow = new MainWindow();
-                mainWindow.setVisible(true);
-                dispose();
-            }
+        undoButton.addActionListener(e -> {
+            MainWindow mainWindow = new MainWindow();
+            mainWindow.setVisible(true);
+            dispose();
         });
 
         gbc.gridx = 0;
@@ -136,7 +111,7 @@ public class DeviceCreator extends JFrame {
         add(scrollPane, BorderLayout.CENTER);
     }
 
-    private static DeviceType getDeviceTypeOther(DeviceType deviceType) {
+    private static DeviceType getDeviceType(DeviceType deviceType) {
         switch (deviceType) {
             case REDLER -> {
                 return DeviceType.SPR;
