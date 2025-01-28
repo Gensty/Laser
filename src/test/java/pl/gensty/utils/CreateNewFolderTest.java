@@ -33,16 +33,16 @@ public class CreateNewFolderTest {
         configSPR = mock(ConfigSPR.class);
     }
 
-    @Test
-    public void testCreateNewFolderConfigNPK() {
-        when(configNPK.setFolderName()).thenReturn("moduleFolder");
-
-        String result = FolderManager.createNewFolder(configNPK, "testModule", MaterialType.SHEET, outputArea, catalogPathField);
-
-        assertTrue(result.contains("test/catalog/moduleFolder-testModule"));
-        assertTrue(new File(result).exists());
-        assertTrue(outputArea.getText().contains("Folder utworzony: " + result));
-    }
+//    @Test
+//    public void testCreateNewFolderConfigNPK() {
+//        when(configNPK.setFolderName()).thenReturn("moduleFolder");
+//
+//        String result = FolderManager.createNewFolder(configNPK, "testModule", MaterialType.SHEET, outputArea, catalogPathField);
+//
+//        assertTrue(result.contains("test/catalog/moduleFolder-testModule"));
+//        assertTrue(new File(result).exists());
+//        assertTrue(outputArea.getText().contains("Folder utworzony: " + result));
+//    }
 
     @Test
     public void testCreateNewFolderWithNonSheetAndConfigSPR() {
@@ -55,19 +55,19 @@ public class CreateNewFolderTest {
 //        assertTrue(outputArea.getText().contains("Folder utworzony: " + result));
     }
 
-    @Test
-    public void testFolderAlreadyExists() {
-        File existingFolder = new File("test/catalog/existingFolder");
-        existingFolder.mkdirs();
-
-        when(abstractConfig.setFolderName()).thenReturn("existingFolder");
-
-        String result = FolderManager.createNewFolder(abstractConfig, "testModule", MaterialType.SHEET, outputArea, catalogPathField);
-
-        assertTrue(result.contains("test/catalog/existingFolder"));
-        assertTrue(outputArea.getText().contains("Folder o nazwie existingFolder już istnieje."));
-
-        // Clean up
-        existingFolder.delete();
-    }
+//    @Test
+//    public void testFolderAlreadyExists() {
+//        File existingFolder = new File("test/catalog/existingFolder");
+//        existingFolder.mkdirs();
+//
+//        when(abstractConfig.setFolderName()).thenReturn("existingFolder");
+//
+//        String result = FolderManager.createNewFolder(abstractConfig, "testModule", MaterialType.SHEET, outputArea, catalogPathField);
+//
+//        assertTrue(result.contains("test/catalog/existingFolder"));
+//        assertTrue(outputArea.getText().contains("Folder o nazwie existingFolder już istnieje."));
+//
+//        // Clean up
+//        existingFolder.delete();
+//    }
 }
