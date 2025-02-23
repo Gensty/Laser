@@ -21,38 +21,22 @@ public class MainWindow extends JFrame{
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        JButton conveyorButton = new JButton(DeviceType.REDLER.toString());
-        JButton elevatorButton = new JButton(DeviceType.PODNOSNIK.toString());
-        JButton damperButton = new JButton(DeviceType.ZASUWA.toString());
-        JButton dividerButton = new JButton(DeviceType.ROZDZIELACZ.toString());
-
-        conveyorButton.setPreferredSize(new Dimension(300, 30));
-        elevatorButton.setPreferredSize(new Dimension(300, 30));
-        damperButton.setPreferredSize(new Dimension(300, 30));
-        dividerButton.setPreferredSize(new Dimension(300, 30));
-
-        conveyorButton.addActionListener(e -> openCreatorWindow(DeviceType.REDLER));
-        elevatorButton.addActionListener(e -> openCreatorWindow(DeviceType.PODNOSNIK));
-        damperButton.addActionListener(e -> openCreatorWindow(DeviceType.ZASUWA));
-        dividerButton.addActionListener(e -> openCreatorWindow(DeviceType.ROZDZIELACZ));
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        panel.add(conveyorButton, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        panel.add(elevatorButton, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        panel.add(damperButton, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        panel.add(dividerButton, gbc);
+        createDeviceButton(DeviceType.REDLER, 0, panel, gbc);
+        createDeviceButton(DeviceType.PODNOSNIK, 1, panel, gbc);
+        createDeviceButton(DeviceType.ZASUWA, 2, panel, gbc);
+        createDeviceButton(DeviceType.ROZDZIELACZ, 3, panel, gbc);
 
         add(panel);
+    }
+
+    private void createDeviceButton(DeviceType deviceType, int gridY, JPanel panel, GridBagConstraints gbc) {
+        JButton button = new JButton(deviceType.toString());
+        button.setPreferredSize(new Dimension(300, 30));
+        button.addActionListener(e -> openCreatorWindow(deviceType));
+
+        gbc.gridx = 0;
+        gbc.gridy = gridY;
+        panel.add(button, gbc);
     }
 
     private void openCreatorWindow(DeviceType deviceType) {

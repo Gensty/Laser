@@ -1,17 +1,11 @@
-package pl.gensty.utils;
+package pl.gensty;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import pl.gensty.configuration.ConfigNPK;
 import pl.gensty.configuration.ConfigOther;
 import pl.gensty.configuration.ConfigSPR;
-import pl.gensty.manager.FileManager;
-import pl.gensty.enums.Module;
 
-import java.util.List;
-import static org.junit.jupiter.api.Assertions.*;
-
-public class DeviceModuleTest {
+public class DeviceCreatorTest {
     private ConfigNPK configNPKwithAllModules;
     private ConfigNPK configNPKwithoutSOandPO;
     private ConfigSPR configSPR;
@@ -22,7 +16,7 @@ public class DeviceModuleTest {
 
 //    @BeforeEach
 //    void setUp() {
-//        configNPKwithAllModules = new ConfigNPK.Builder()
+//        configNPKwithAllModules = new ConfigNPK.builder()
 //                .type("NPK")
 //                .order("001")
 //                .size("NPK-100")
@@ -34,7 +28,7 @@ public class DeviceModuleTest {
 //                .isMaintenancePlatform(true)
 //                .build();
 //
-//        configNPKwithoutSOandPO = new ConfigNPK.Builder()
+//        configNPKwithoutSOandPO = new ConfigNPK.ConfigNPKBuilder()
 //                .type("NPK")
 //                .order("001")
 //                .size("NPK-100")

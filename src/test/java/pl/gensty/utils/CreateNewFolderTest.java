@@ -8,11 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import pl.gensty.configuration.AbstractConfig;
 import pl.gensty.configuration.ConfigNPK;
 import pl.gensty.configuration.ConfigSPR;
-import pl.gensty.enums.MaterialType;
-import pl.gensty.manager.FolderManager;
 
 import javax.swing.*;
-import java.io.File;
 
 public class CreateNewFolderTest {
     private JTextArea outputArea;
@@ -33,8 +30,8 @@ public class CreateNewFolderTest {
         configSPR = mock(ConfigSPR.class);
     }
 
-//    @Test
-//    public void testCreateNewFolderConfigNPK() {
+    @Test
+    public void testCreateNewFolderConfigNPK() {
 //        when(configNPK.setFolderName()).thenReturn("moduleFolder");
 //
 //        String result = FolderManager.createNewFolder(configNPK, "testModule", MaterialType.SHEET, outputArea, catalogPathField);
@@ -42,7 +39,7 @@ public class CreateNewFolderTest {
 //        assertTrue(result.contains("test/catalog/moduleFolder-testModule"));
 //        assertTrue(new File(result).exists());
 //        assertTrue(outputArea.getText().contains("Folder utworzony: " + result));
-//    }
+    }
 
     @Test
     public void testCreateNewFolderWithNonSheetAndConfigSPR() {

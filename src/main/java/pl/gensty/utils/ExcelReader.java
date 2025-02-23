@@ -159,7 +159,6 @@ public class ExcelReader {
 
         if (!excelFile.exists()) {
             System.out.println("Plik Excel nie istnieje: " + excelPath);
-//            return paths;
         }
 
         try (FileInputStream fis = new FileInputStream(excelPath);

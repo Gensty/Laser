@@ -2,7 +2,10 @@ package pl.gensty;
 
 import pl.gensty.enums.DeviceType;
 import pl.gensty.enums.MaterialType;
-import pl.gensty.manager.PackageManager;
+import pl.gensty.manager.FileHandler;
+import pl.gensty.manager.FolderHandler;
+import pl.gensty.manager.PackageHandler;
+import pl.gensty.manager.PathHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,81 +34,17 @@ public class DeviceCreator extends JFrame {
         outputArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(outputArea);
 
-        JButton setLaserButton = new JButton(deviceType + " - LASER");
-        setLaserButton.setPreferredSize(new Dimension(200,30));
-
-        JButton setWaterButton = new JButton(deviceType + " - WODA");
-        setWaterButton.setPreferredSize(new Dimension(200,30));
-
-        JButton setPlexiButton = new JButton(deviceType + " - PLEXI");
-        setPlexiButton.setPreferredSize(new Dimension(200,30));
-
-        JButton setFilcButton = new JButton(deviceType + " - FILC");
-        setFilcButton.setPreferredSize(new Dimension(200,30));
-
-        JButton undoButton = new JButton("Cofnij do wyboru urządzeń");
-        undoButton.setPreferredSize(new Dimension(410,30));
-
         DeviceType deviceTypeShort = getDeviceType(deviceType);
 
-        setLaserButton.addActionListener(e -> PackageManager.preparePackage(deviceTypeShort, MaterialType.SHEET, outputArea,excelPathField,catalogPathField));
+        createPackageTypeButton(deviceType, deviceTypeShort, MaterialType.SHEET, "LASER", 1, 3, panel, gbc);
+        createPackageTypeButton(deviceType, deviceTypeShort, MaterialType.PE1000, "WODA", 2, 3, panel, gbc);
+        createPackageTypeButton(deviceType, deviceTypeShort, MaterialType.PLEXI,"PLEXI", 1, 4, panel, gbc);
+        createPackageTypeButton(deviceType, deviceTypeShort, MaterialType.FILC,"FILC", 2, 4, panel, gbc);
 
-        setWaterButton.addActionListener(e -> PackageManager.preparePackage(deviceTypeShort, MaterialType.PE1000, outputArea,excelPathField,catalogPathField));
+        createFieldButton("Ścieżka do konfiguratora Excel:", 0, excelPathField, panel, gbc);
+        createFieldButton("Ścieżka docelowa dla paczek:", 1, catalogPathField, panel, gbc);
 
-        setPlexiButton.addActionListener(e -> PackageManager.preparePackage(deviceTypeShort, MaterialType.PLEXI, outputArea,excelPathField,catalogPathField));
-
-        setFilcButton.addActionListener(e -> PackageManager.preparePackage(deviceTypeShort, MaterialType.FILC, outputArea,excelPathField,catalogPathField));
-
-        undoButton.addActionListener(e -> {
-            MainWindow mainWindow = new MainWindow();
-            mainWindow.setVisible(true);
-            dispose();
-        });
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 1;
-        panel.add(new JLabel("Ścieżka konfiguratora Excel:"), gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        panel.add(excelPathField, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        panel.add(new JLabel("Ścieżka katalogu dla paczek:"), gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        gbc.gridwidth = 2;
-        panel.add(catalogPathField, gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 3;
-        gbc.gridwidth = 1;
-        panel.add(setLaserButton, gbc);
-
-        gbc.gridx = 2;
-        gbc.gridy = 3;
-        gbc.gridwidth = 1;
-        panel.add(setWaterButton, gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 4;
-        gbc.gridwidth = 1;
-        panel.add(setPlexiButton, gbc);
-
-        gbc.gridx = 2;
-        gbc.gridy = 4;
-        gbc.gridwidth = 1;
-        panel.add(setFilcButton, gbc);
-
-        gbc.gridx = 1;
-        gbc.gridy = 6;
-        gbc.gridwidth = 2;
-        panel.add(undoButton, gbc);
+        createUndoButton(1, 6, 2, panel, gbc);
 
         add(panel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
@@ -123,5 +62,60 @@ public class DeviceCreator extends JFrame {
                 return DeviceType.OTHER;
             }
         }
+    }
+
+    private void createPackageTypeButton(
+            DeviceType deviceType,
+            DeviceType deviceTypeShort,
+            MaterialType materialType,
+            String packageType,
+            int gridX,
+            int gridY,
+            JPanel panel,
+            GridBagConstraints gbc
+    ) {
+        PathHandler pathHandler = new PathHandler(excelPathField, catalogPathField, outputArea);
+        FileHandler fileHandler = new FileHandler(pathHandler, outputArea);
+        FolderHandler folderHandler = new FolderHandler(pathHandler, outputArea);
+        PackageHandler packageHandler = new PackageHandler(folderHandler, fileHandler, pathHandler);
+        JButton button = new JButton(deviceType + " - " + packageType);
+        button.setPreferredSize(new Dimension(200,30));
+        button.addActionListener(e -> packageHandler.preparePackage(deviceTypeShort, materialType));
+        gbc.gridx = gridX;
+        gbc.gridy = gridY;
+        gbc.gridwidth = 1;
+        panel.add(button, gbc);
+    }
+
+    private void createFieldButton(
+            String fieldText,
+            int gridY,
+            JTextField textField,
+            JPanel panel,
+            GridBagConstraints gbc
+    ) {
+        gbc.gridx = 0;
+        gbc.gridy = gridY;
+        gbc.gridwidth = 1;
+        panel.add(new JLabel(fieldText), gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = gridY;
+        gbc.gridwidth = 2;
+        panel.add(textField, gbc);
+    }
+
+    private void createUndoButton(int gridX, int gridY, int gridWidth, JPanel panel, GridBagConstraints gbc) {
+        JButton undoButton = new JButton("Cofnij do wyboru urządzeń");
+        undoButton.setPreferredSize(new Dimension(410,30));
+        undoButton.addActionListener(e -> {
+            MainWindow mainWindow = new MainWindow();
+            mainWindow.setVisible(true);
+            dispose();
+        });
+        gbc.gridx = gridX;
+        gbc.gridy = gridY;
+        gbc.gridwidth = gridWidth;
+        panel.add(undoButton, gbc);
     }
 }
