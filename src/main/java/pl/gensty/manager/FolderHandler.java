@@ -57,7 +57,7 @@ public class FolderHandler {
         //TODO: nie działa metoda readModuleQuantity
 //        Integer moduleQuantity = readModuleQuantity(excelPath, abstractConfig, module);
         Integer moduleQuantity = 1;
-        String replacement = (abstractConfig instanceof ConfigOther) ? " " : "_" + module.toString() + " ";
+        String replacement = (abstractConfig instanceof ConfigOther) ? " " : "_" + module.name() + " ";
 
         String temporaryFolderName = (materialType == MaterialType.SHEET)
                 ? abstractConfig.setFolderName().replace("module", replacement)

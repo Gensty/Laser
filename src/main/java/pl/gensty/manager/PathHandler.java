@@ -8,8 +8,6 @@ import javax.swing.*;
 
 import java.util.Map;
 
-import static pl.gensty.utils.ExcelReader.readPaths;
-
 public class PathHandler {
     private final JTextField excelPathField;
     private final JTextField catalogPathField;
@@ -22,32 +20,32 @@ public class PathHandler {
     }
 
     public String getTargetPath() {
-        String targetPath = catalogPathField.getText();
-        if (targetPath == null || targetPath.isEmpty() || targetPath.isBlank()) {
-            outputArea.append("Musisz podać ścieżkę, w której chcesz stworzyć paczki.\n");
-            throw new IllegalArgumentException("Ścieżka do katalogu jest pusta.");
-        }
-        return targetPath;
+        return validatePath(catalogPathField.getText(), "Podaj ściężkę docelową dla paczek.\n");
     }
 
     public String getExcelPath() {
-        String excelPath = excelPathField.getText();
-        if (excelPath == null || excelPath.isEmpty() || excelPath.isBlank()) {
-            outputArea.append("Musisz podać ścieżkę do konfiguratora Excel.\n");
-            throw new IllegalArgumentException("Ścieżka do katalogu jest pusta.");
-        }
-        return excelPath;
+        return validatePath(excelPathField.getText(), "Podaj ściężkę do konfiguratora Excel.\n");
     }
 
-    public String getSourcePath(String excelPath, AbstractConfig abstractConfig, Module module) {
-        String sourcePath;
-        if (abstractConfig instanceof ConfigOther) {
-            sourcePath = abstractConfig.getSize();
-        } else {
-            sourcePath = abstractConfig.getSize() + "-" + module.toString();
+    public String getSourcePath(AbstractConfig abstractConfig, Module module, Map<String, String> paths) {
+        String sourcePath = (abstractConfig instanceof ConfigOther)
+        ? abstractConfig.getSize()
+        : abstractConfig.getSize() + "_" + module.name();
+
+        String path = paths.get(sourcePath);
+
+        if (path == null || path.isBlank()) {
+            throw new IllegalArgumentException("Nie znaleziono ścieżki dla: " + sourcePath);
         }
 
-        Map<String, String> paths = readPaths(excelPath);
-        return paths.get(sourcePath);
+        return path;
+    }
+
+    private String validatePath(String path, String outputMessage) {
+        if (path == null || path.isBlank()) {
+            outputArea.append(outputMessage);
+            throw new IllegalArgumentException("Ścieżka do katalogu jest pusta.");
+        }
+        return path;
     }
 }

@@ -9,7 +9,6 @@ import java.util.Map;
 public class PartBuilder implements PartBuilderStrategy {
     @Override
     public AbstractPart buildPart(Map<Parameter, Object> params) {
-        //TODO: zaimplementować Part po readPart
         return Part.builder()
                 .numberEDT(params.get(Parameter.NUMBER_EDT).toString())
                 .material(params.get(Parameter.MATERIAL).toString())

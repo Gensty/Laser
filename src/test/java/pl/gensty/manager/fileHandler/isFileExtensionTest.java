@@ -13,9 +13,9 @@ import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class FileHandlerIsFileTypeTest {
+class isFileExtensionTest {
     private FileHandler fileHandler;
-    private Method isFileTypeMethod;
+    private Method isFileExtensionMethod;
 
     @BeforeEach
     void setUp() throws NoSuchMethodException {
@@ -25,8 +25,8 @@ class FileHandlerIsFileTypeTest {
         PathHandler pathHandler = new PathHandler(excelPathField, catalogPathField, outputArea);
         fileHandler = new FileHandler(pathHandler, outputArea);
 
-        isFileTypeMethod = FileHandler.class.getDeclaredMethod("isFileType", File.class, String.class);
-        isFileTypeMethod.setAccessible(true);
+        isFileExtensionMethod = FileHandler.class.getDeclaredMethod("isFileExtension", File.class, String.class);
+        isFileExtensionMethod.setAccessible(true);
     }
 
     @ParameterizedTest
@@ -40,13 +40,13 @@ class FileHandlerIsFileTypeTest {
             "testFile.txt, pdf, false"
     })
 
-    public void testIsFileType(String fileName, String extension, boolean expectedResult) throws InvocationTargetException, IllegalAccessException {
+    public void testIsExtensionType(String fileName, String extension, boolean expectedResult) throws InvocationTargetException, IllegalAccessException {
         File file = new File(fileName);
-        boolean result = invokeIsFileType(file, extension);
+        boolean result = invokeIsFileExtension(file, extension);
         assertEquals(expectedResult, result, "Test failed for file: " + fileName + " with extension: " + extension);
     }
 
-    private boolean invokeIsFileType(File file, String extension) throws InvocationTargetException, IllegalAccessException {
-        return (boolean) isFileTypeMethod.invoke(fileHandler, file, extension);
+    private boolean invokeIsFileExtension(File file, String extension) throws InvocationTargetException, IllegalAccessException {
+        return (boolean) isFileExtensionMethod.invoke(fileHandler, file, extension);
     }
 }

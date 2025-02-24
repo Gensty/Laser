@@ -12,9 +12,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static pl.gensty.utils.ExcelReader.readPartsFromConfig;
+import static pl.gensty.utils.ExcelReader.readPaths;
 
 public class FileHandler {
     private final PathHandler pathHandler;
@@ -27,7 +29,8 @@ public class FileHandler {
 
     public void copyFiles(AbstractConfig abstractConfig, Module module, String targetPath, MaterialType materialType) {
         String excelPath = pathHandler.getExcelPath();
-        String sourcePath = pathHandler.getSourcePath(excelPath, abstractConfig, module);
+        Map<String, String> paths = readPaths(excelPath);
+        String sourcePath = pathHandler.getSourcePath(abstractConfig, module, paths);
         List<AbstractPart> parts = readPartsFromConfig(excelPath, abstractConfig, module);
 
         List<AbstractPart> configParts = getFiles(abstractConfig, parts, materialType.toString());
@@ -67,17 +70,32 @@ public class FileHandler {
     }
 
     private static List<AbstractPart> filterByMaterial(List<AbstractPart> parts, String materialType) {
-        if (MaterialType.SHEET.toString().equals(materialType)) {
-            return parts.stream()
-                    .filter(part -> MaterialType.S235.toString().equals(part.getMaterial()) ||
-                            MaterialType.DX51D.toString().equals(part.getMaterial()) ||
-                            MaterialType.A304.toString().equals(part.getMaterial()))
-                    .toList();
-        } else {
-            return parts.stream()
-                    .filter(part -> materialType.equals(part.getMaterial()))
-                    .toList();
-        }
+        boolean isSheetMaterial = MaterialType.SHEET.name().equals(materialType);
+        return parts.stream()
+                .filter(part -> isSheetMaterial
+                    ? isSheetMaterial(part.getMaterial())
+                    : materialType.equals(part.getMaterial()))
+                .toList();
+
+
+//        if (MaterialType.SHEET.toString().equals(materialType)) {
+//            return parts.stream()
+//                    .filter(part -> MaterialType.S235.toString().equals(part.getMaterial()) ||
+//                            MaterialType.DX51D.toString().equals(part.getMaterial()) ||
+//                            MaterialType.A304.toString().equals(part.getMaterial()))
+//                    .toList();
+//        } else {
+//            return parts.stream()
+//                    .filter(part -> materialType.equals(part.getMaterial()))
+//                    .toList();
+//        }
+    }
+
+    private static boolean isSheetMaterial(String materialType) {
+        return switch (materialType) {
+            case "A304", "A316", "DX51D", "S235" -> true;
+            default -> false;
+        };
     }
 
     private void processPartFiles(AbstractPart part, File[] files, File targetFolder) {
@@ -94,9 +112,9 @@ public class FileHandler {
     private Path getTargetFilePath(File file, AbstractPart part, File targetFolder) {
         int signs = part.getNumberEDT().startsWith("ZM") ? 13 : 16;
 
-        if ((isFileType(file, "dwg") || isFileType(file, "dxf")) && file.getName().startsWith(part.getNumberEDT())) {
+        if ((isFileExtension(file, "dwg") || isFileExtension(file, "dxf")) && file.getName().startsWith(part.getNumberEDT())) {
             return Paths.get(targetFolder.getPath(), part.toString());
-        } else if (isFileType(file, "pdf") && file.getName().startsWith(part.getNumberEDT().substring(0, signs))) {
+        } else if (isFileExtension(file, "pdf") && file.getName().startsWith(part.getNumberEDT().substring(0, signs))) {
             return Paths.get(targetFolder.getPath(), file.getName());
         }
 
@@ -121,7 +139,7 @@ public class FileHandler {
         return sourceFolder.isDirectory() && targetFolder.exists();
     }
 
-    private boolean isFileType(File file, String fileExtension) {
+    private boolean isFileExtension(File file, String fileExtension) {
         return (file.getName().endsWith(fileExtension.toUpperCase()) || file.getName().endsWith(fileExtension.toLowerCase()));
     }
 }
