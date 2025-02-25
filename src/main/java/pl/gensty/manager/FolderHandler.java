@@ -20,9 +20,9 @@ public class FolderHandler {
         this.outputArea = outputArea;
     }
 
-    public String createNewFolder(AbstractConfig abstractConfig, Module module, MaterialType materialType) {
+    public String createNewFolder(AbstractConfig abstractConfig, Module module) {
         String targetPath = pathHandler.getTargetPath();
-        String folderName = setFolderName(abstractConfig, module, materialType);
+        String folderName = setFolderName(abstractConfig, module);
         String folderPath = targetPath + "\\" + folderName;
 
         File newFolder = new File(folderPath);
@@ -53,20 +53,54 @@ public class FolderHandler {
         }
     }
 
-    private String setFolderName(AbstractConfig abstractConfig, Module module, MaterialType materialType) {
-        //TODO: nie działa metoda readModuleQuantity
-//        Integer moduleQuantity = readModuleQuantity(excelPath, abstractConfig, module);
-        Integer moduleQuantity = 1;
-        String replacement = (abstractConfig instanceof ConfigOther) ? " " : "_" + module.name() + " ";
+    private String setFolderName(AbstractConfig abstractConfig, Module module) {
+        int moduleQuantity = 1; //TODO: Możliwe dodanie readModuleQuantity
+        String folderMaterial = MaterialType.DX51D.name().equals(abstractConfig.getMaterial()) ? "DX51D+S235" : abstractConfig.getMaterial();
 
-        String temporaryFolderName = (materialType == MaterialType.SHEET)
-                ? abstractConfig.setFolderName().replace("module", replacement)
-                : abstractConfig.setFolderName(materialType).replace("module", replacement);
+        int quantity;
+        String replacement;
+        if(abstractConfig instanceof ConfigOther) {
+            quantity = abstractConfig.getDeviceQuantity();
+            replacement = " ";
+        } else {
+            quantity = moduleQuantity;
+            replacement = "_" + module.name() + " ";
+        }
 
-        int quantity = (abstractConfig instanceof ConfigOther) ? abstractConfig.getDeviceQuantity() : moduleQuantity;
-
-        return temporaryFolderName.replace("quantity", isSingleCharNumber(quantity));
-
-
+        return String.format("ZL_%s - %s%s%s (x%s)",
+                abstractConfig.getOrder(),
+                abstractConfig.getSize(),
+                replacement,
+                folderMaterial,
+                isSingleCharNumber(quantity));
     }
+
+//    private String setFolderName(AbstractConfig abstractConfig, Module module, MaterialType materialType) {
+//        //TODO: nie działa metoda readModuleQuantity
+////        Integer moduleQuantity = readModuleQuantity(excelPath, abstractConfig, module);
+//        Integer moduleQuantity = 1;
+//        String replacement = (abstractConfig instanceof ConfigOther) ? " " : "_" + module.name() + " ";
+//
+//        String temporaryFolderName = (materialType == MaterialType.STEEL)
+//                ? abstractConfig.setFolderName().replace("module", replacement)
+//                : abstractConfig.setFolderName(materialType).replace("module", replacement);
+//
+//        int quantity = (abstractConfig instanceof ConfigOther) ? abstractConfig.getDeviceQuantity() : moduleQuantity;
+//
+//        return temporaryFolderName.replace("quantity", isSingleCharNumber(quantity));
+//    }
+//
+//    public String setFolderName() {
+//        String folderMaterial;
+//        if (MaterialType.DX51D.toString().equals(material)) {
+//            folderMaterial = "DX51D+S235";
+//        } else {
+//            folderMaterial = material;
+//        }
+//        return "ZL_" + order + " - " + size + "module" + folderMaterial + " (x" + "quantity" + ")";
+//    }
+//
+//    public String setFolderName(MaterialType materialType) {
+//        return "ZL_" + order + " - " + size + "module" + materialType.name() + " (x" + "quantity" + ")";
+//    }
 }

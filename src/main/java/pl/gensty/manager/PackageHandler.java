@@ -27,7 +27,7 @@ public class PackageHandler {
         List<Module> modules = abstractConfig.getModules();
 
         for (Module module : modules) {
-            String targetPath = folderHandler.createNewFolder(abstractConfig, module, materialType);
+            String targetPath = folderHandler.createNewFolder(abstractConfig, module);
             fileHandler.copyFiles(abstractConfig, module, targetPath, materialType);
             folderHandler.deleteFolder(targetPath);
         }

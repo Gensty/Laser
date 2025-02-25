@@ -3,18 +3,18 @@ package pl.gensty.configuration.strategy;
 import pl.gensty.configuration.AbstractConfig;
 import pl.gensty.configuration.ConfigOther;
 
-import static pl.gensty.utils.ExcelReader.readDeviceConfig;
+import static pl.gensty.utils.ExcelReader.getDeviceConfig;
 
 public class ConfigBuilderStrategyOther implements ConfigBuilderStrategy {
     @Override
     public AbstractConfig buildConfig(String excelPath) {
         return ConfigOther.builder()
-                .order(readDeviceConfig(excelPath, ORDER))
-                .type(readDeviceConfig(excelPath, TYPE))
-                .size(readDeviceConfig(excelPath, SIZE))
-                .material(readDeviceConfig(excelPath, MATERIAL))
-                .deviceQuantity(Integer.parseInt(readDeviceConfig(excelPath, DEVICE_QUANTITY)))
-                .driveType(readDeviceConfig(excelPath, DRIVE_TYPE))
+                .order(getDeviceConfig(excelPath, ORDER))
+                .type(getDeviceConfig(excelPath, TYPE))
+                .size(getDeviceConfig(excelPath, SIZE))
+                .material(getDeviceConfig(excelPath, MATERIAL))
+                .deviceQuantity(Integer.parseInt(getDeviceConfig(excelPath, DEVICE_QUANTITY)))
+                .driveType(getDeviceConfig(excelPath, DRIVE_TYPE))
                 .build();
     }
 }

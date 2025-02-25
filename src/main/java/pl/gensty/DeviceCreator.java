@@ -36,7 +36,7 @@ public class DeviceCreator extends JFrame {
 
         DeviceType deviceTypeShort = getDeviceType(deviceType);
 
-        createPackageTypeButton(deviceType, deviceTypeShort, MaterialType.SHEET, "LASER", 1, 3, panel, gbc);
+        createPackageTypeButton(deviceType, deviceTypeShort, MaterialType.STEEL, "LASER", 1, 3, panel, gbc);
         createPackageTypeButton(deviceType, deviceTypeShort, MaterialType.PE1000, "WODA", 2, 3, panel, gbc);
         createPackageTypeButton(deviceType, deviceTypeShort, MaterialType.PLEXI,"PLEXI", 1, 4, panel, gbc);
         createPackageTypeButton(deviceType, deviceTypeShort, MaterialType.FILC,"FILC", 2, 4, panel, gbc);
@@ -78,12 +78,15 @@ public class DeviceCreator extends JFrame {
         FileHandler fileHandler = new FileHandler(pathHandler, outputArea);
         FolderHandler folderHandler = new FolderHandler(pathHandler, outputArea);
         PackageHandler packageHandler = new PackageHandler(folderHandler, fileHandler, pathHandler);
+
         JButton button = new JButton(deviceType + " - " + packageType);
         button.setPreferredSize(new Dimension(200,30));
         button.addActionListener(e -> packageHandler.preparePackage(deviceTypeShort, materialType));
+
         gbc.gridx = gridX;
         gbc.gridy = gridY;
         gbc.gridwidth = 1;
+
         panel.add(button, gbc);
     }
 

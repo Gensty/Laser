@@ -15,16 +15,13 @@ import java.io.IOException;
 import java.util.*;
 
 public class ExcelReader {
-    public static String readDeviceConfig(String excelPath, String header) {
+    public static String getDeviceConfig(String excelPath, String header) {
         File excelFile = new File(excelPath);
         if (!excelFile.exists()) {
-            System.out.println("Plik nie istnieje: " + excelPath);
             throw new IllegalArgumentException("Plik nie istnieje: " + excelPath);
         }
 
         try (Workbook workbook = new XSSFWorkbook(new FileInputStream(excelPath))) {
-
-
             FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
             Sheet sheet = workbook.getSheet("Konfigurator");
 
@@ -54,17 +51,15 @@ public class ExcelReader {
         }
     }
 
-    public static List<AbstractPart> readPartsFromConfig(String excelPath, AbstractConfig abstractConfig, Module module) {
+    public static List<AbstractPart> getPartsFromConfig(String excelPath, AbstractConfig abstractConfig, Module module) {
         List<AbstractPart> parts = new ArrayList<>();
+//        File excelFile = new File(excelPath);
+//        if (!excelFile.exists()) {
+//            throw new IllegalArgumentException("Plik nie istnieje: " + excelPath);
+//        }
 
         if (abstractConfig == null) {
             System.out.println("Nie podano konfiguracji do odczytu części");
-            return parts;
-        }
-
-        File excelFile = new File(excelPath);
-        if (!excelFile.exists()) {
-            System.out.println("Plik nie istnieje: " + excelPath);
             return parts;
         }
 
@@ -77,53 +72,35 @@ public class ExcelReader {
                 if (row.getRowNum() < 10) {
                     continue;
                 }
-                Cell cell = row.getCell(0);
 
-                if (cell == null || cell.getCellType() == CellType.BLANK) {
+                if (isRowEmpty(row)) {
                     break;
                 }
 
-                //TODO: weryfikacja rzędów, kolumn
-                String numberEDT = getCellStringValue(row.getCell(1), evaluator);
-                String material = getCellStringValue(row.getCell(2), evaluator);
-                Integer thickness = getCellIntValue(row.getCell(3), evaluator);
-                Integer quantity = getCellIntValue(row.getCell(4), evaluator);
-                String description = getCellStringValue(row.getCell(5), evaluator);
-
-                Map<Parameter, Object> params = new HashMap<>();
-                params.put(Parameter.NUMBER_EDT, numberEDT);
-                params.put(Parameter.MATERIAL, material);
-                params.put(Parameter.THICKNESS, thickness);
-                params.put(Parameter.QUANTITY, quantity);
-                params.put(Parameter.DESCRIPTION, description);
-
-                AbstractPart abstractPart = FactoryPart.createPart(params);
-                parts.add(abstractPart);
+                AbstractPart part = createPart(row, evaluator);
+                parts.add(part);
             }
         } catch (IOException e) {
-            e.printStackTrace();
-            return parts;
+            throw new IllegalArgumentException("Plik nie istnieje: " + excelPath);
+//            e.printStackTrace();
+//            return parts;
         }
 
         return parts;
     }
 
-    public static Integer readModuleQuantity(String excelPath, AbstractConfig abstractConfig, Module module) {
+    public static Integer readModuleQuantity(String excelPath, Module module) {
         Integer moduleQuantity = 1;
-        if (abstractConfig == null) {
-            return moduleQuantity;
-        }
 
         File excelFile = new File(excelPath);
         if (!excelFile.exists()) {
-            System.out.println("Plik nie istnieje: " + excelPath);
-            return moduleQuantity;
+            throw new IllegalArgumentException("Plik nie istnieje: " + excelPath);
         }
 
         try (Workbook workbook = new XSSFWorkbook(new FileInputStream(excelPath))) {
             FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 
-            Sheet sheet = workbook.getSheet(module.toString());
+            Sheet sheet = workbook.getSheet(module.name());
 
             String header = "Ilość modułów";
             String headerExcel = null;
@@ -134,27 +111,28 @@ public class ExcelReader {
 
                 if (cell == null || cell.getCellType() == CellType.BLANK) {
                     throw new IllegalArgumentException("Sprawdź czy któraś z komórek w konfiguratorze Excel nie jest pusta.");
-                } else {
-                    try {
-                        moduleQuantity = getCellIntValue(sheet.getRow(i).getCell(1), evaluator);
-                    } catch (IllegalStateException e) {
-                        System.out.println("Sprawdź ilość modułów w excelu. Moduł: " + module);
-                    }
+                }
+
+                try {
+                    moduleQuantity = getCellIntValue(sheet.getRow(i).getCell(1), evaluator);
+                } catch (IllegalStateException e) {
+                    System.out.println("Sprawdź ilość modułów w excelu. Moduł: " + module);
                 }
 
                 i++;
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
-            return moduleQuantity;
+            throw new IllegalArgumentException("Plik nie istnieje: " + excelPath);
+//            e.printStackTrace();
+//            return moduleQuantity;
         }
 
         return moduleQuantity;
     }
 
-    public static Map<String, String> readPaths(String excelPath) {
-        HashMap<String, String> paths = new HashMap<>();
+    public static Map<String, String> getPaths(String excelPath) {
+        Map<String, String> paths = new HashMap<>();
         File excelFile = new File(excelPath);
 
         if (!excelFile.exists()) {
@@ -168,25 +146,44 @@ public class ExcelReader {
 
             Sheet sheet = workbook.getSheet("DataPath");
 
-            for (Row row : sheet) {
-                if (row.getRowNum() == 0) {
-                    continue;
-                }
-                Cell cell = row.getCell(0);
-
-                if (cell == null || cell.getCellType() == CellType.BLANK) {
-                    break;
-                }
-
-                String size = getCellStringValue(row.getCell(0), evaluator);
-                String path = getCellStringValue(row.getCell(1), evaluator);
-
-                paths.put(size, path);
-            }
+            readPaths(sheet, paths, evaluator);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return paths;
+    }
+
+    private static void readPaths(Sheet sheet, Map<String, String> paths, FormulaEvaluator evaluator) {
+        for (Row row : sheet) {
+            if (isRowEmpty(row)) {
+                if (paths.isEmpty()) {
+                    continue;
+                }
+                break;
+            }
+
+            String size = getCellStringValue(row.getCell(0), evaluator);
+            String path = getCellStringValue(row.getCell(1), evaluator);
+
+            paths.put(size, path);
+        }
+    }
+
+    private static AbstractPart createPart(Row row, FormulaEvaluator evaluator) {
+        Map<Parameter, Object> params = Map.of(
+                Parameter.NUMBER_EDT, getCellStringValue(row.getCell(1), evaluator),
+                Parameter.MATERIAL, getCellStringValue(row.getCell(2), evaluator),
+                Parameter.THICKNESS, getCellIntValue(row.getCell(3), evaluator),
+                Parameter.QUANTITY, getCellIntValue(row.getCell(4), evaluator),
+                Parameter.DESCRIPTION, getCellStringValue(row.getCell(5), evaluator)
+        );
+
+        return FactoryPart.createPart(params);
+    }
+
+    private static boolean isRowEmpty(Row row) {
+        Cell cell = row.getCell(0);
+        return cell == null || cell.getCellType() == CellType.BLANK;
     }
 
     private static String getCellStringValue(Cell cell, FormulaEvaluator evaluator) {

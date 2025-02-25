@@ -1,7 +1,7 @@
 package pl.gensty.enums;
 
 public enum MaterialType {
-    SHEET,
+    STEEL,
     S235,
     DX51D,
     A304,

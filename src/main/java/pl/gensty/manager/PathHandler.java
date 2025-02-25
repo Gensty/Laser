@@ -28,17 +28,17 @@ public class PathHandler {
     }
 
     public String getSourcePath(AbstractConfig abstractConfig, Module module, Map<String, String> paths) {
-        String sourcePath = (abstractConfig instanceof ConfigOther)
+        String config = (abstractConfig instanceof ConfigOther)
         ? abstractConfig.getSize()
         : abstractConfig.getSize() + "_" + module.name();
 
-        String path = paths.get(sourcePath);
+        String sourcePath = paths.get(config);
 
-        if (path == null || path.isBlank()) {
-            throw new IllegalArgumentException("Nie znaleziono ścieżki dla: " + sourcePath);
+        if (sourcePath == null || sourcePath.isBlank()) {
+            throw new IllegalArgumentException("Nie znaleziono ścieżki dla: " + config);
         }
 
-        return path;
+        return sourcePath;
     }
 
     private String validatePath(String path, String outputMessage) {

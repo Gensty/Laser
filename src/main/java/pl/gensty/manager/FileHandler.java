@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static pl.gensty.utils.ExcelReader.readPartsFromConfig;
-import static pl.gensty.utils.ExcelReader.readPaths;
+import static pl.gensty.utils.ExcelReader.getPartsFromConfig;
+import static pl.gensty.utils.ExcelReader.getPaths;
 
 public class FileHandler {
     private final PathHandler pathHandler;
@@ -29,9 +29,9 @@ public class FileHandler {
 
     public void copyFiles(AbstractConfig abstractConfig, Module module, String targetPath, MaterialType materialType) {
         String excelPath = pathHandler.getExcelPath();
-        Map<String, String> paths = readPaths(excelPath);
+        Map<String, String> paths = getPaths(excelPath);
         String sourcePath = pathHandler.getSourcePath(abstractConfig, module, paths);
-        List<AbstractPart> parts = readPartsFromConfig(excelPath, abstractConfig, module);
+        List<AbstractPart> parts = getPartsFromConfig(excelPath, abstractConfig, module);
 
         List<AbstractPart> configParts = getFiles(abstractConfig, parts, materialType.toString());
 
@@ -70,10 +70,10 @@ public class FileHandler {
     }
 
     private static List<AbstractPart> filterByMaterial(List<AbstractPart> parts, String materialType) {
-        boolean isSheetMaterial = MaterialType.SHEET.name().equals(materialType);
+        boolean isSteelPart = MaterialType.STEEL.name().equals(materialType);
         return parts.stream()
-                .filter(part -> isSheetMaterial
-                    ? isSheetMaterial(part.getMaterial())
+                .filter(part -> isSteelPart
+                    ? isSteelMaterial(part.getMaterial())
                     : materialType.equals(part.getMaterial()))
                 .toList();
 
@@ -91,7 +91,7 @@ public class FileHandler {
 //        }
     }
 
-    private static boolean isSheetMaterial(String materialType) {
+    private static boolean isSteelMaterial(String materialType) {
         return switch (materialType) {
             case "A304", "A316", "DX51D", "S235" -> true;
             default -> false;
