@@ -1,9 +1,13 @@
 package pl.gensty.manager;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import pl.gensty.configuration.*;
 import pl.gensty.devicePart.*;
+import pl.gensty.devicePart.strategy.FactoryPart;
 import pl.gensty.enums.*;
 import pl.gensty.enums.Module;
+import pl.gensty.utils.ExcelReader;
 
 import javax.swing.*;
 import java.io.File;
@@ -11,29 +15,26 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
-import static pl.gensty.utils.ExcelReader.getPartsFromConfig;
-import static pl.gensty.utils.ExcelReader.getPaths;
+import static pl.gensty.utils.Utils.isRowEmpty;
 
 public class FileHandler {
     private final PathHandler pathHandler;
+    private final ExcelReader excelReader;
     private final JTextArea outputArea;
 
-    public FileHandler(PathHandler pathHandler, JTextArea outputArea) {
+    public FileHandler(ExcelReader excelReader, PathHandler pathHandler, JTextArea outputArea) {
+        this.excelReader = excelReader;
         this.pathHandler = pathHandler;
         this.outputArea = outputArea;
     }
 
     public void copyFiles(AbstractConfig abstractConfig, Module module, String targetPath, MaterialType materialType) {
-        String excelPath = pathHandler.getExcelPath();
-        Map<String, String> paths = getPaths(excelPath);
-        String sourcePath = pathHandler.getSourcePath(abstractConfig, module, paths);
-        List<AbstractPart> parts = getPartsFromConfig(excelPath, abstractConfig, module);
-
-        List<AbstractPart> configParts = getFiles(abstractConfig, parts, materialType.toString());
+        String sourcePath = pathHandler.getSourcePath(abstractConfig, module);
+        List<AbstractPart> parts = getFilteredFiles(abstractConfig, materialType.toString(), module);
 
         File sourceFolder = new File(sourcePath);
         File targetFolder = new File(targetPath);
@@ -42,15 +43,11 @@ public class FileHandler {
             return;
         }
 
-        File[] files = Objects.requireNonNullElse(sourceFolder.listFiles(),new File[0]);
-
-
-        for (AbstractPart part : configParts) {
-            processPartFiles(part, files, targetFolder);
-        }
+        copyMatchingFiles(sourceFolder, targetFolder, parts);
     }
 
-    private static List<AbstractPart> getFiles(AbstractConfig abstractConfig, List<AbstractPart> parts, String materialType) {
+    private List<AbstractPart> getFilteredFiles(AbstractConfig abstractConfig, String materialType, Module module) {
+        List<AbstractPart> parts = getAllParts(abstractConfig, module);
         List<AbstractPart> filteredByQuantity = filterByQuantity(parts);
         List<AbstractPart> filteredByMaterial = filterByMaterial(filteredByQuantity, materialType);
 
@@ -63,62 +60,74 @@ public class FileHandler {
         }
     }
 
-    private static List<AbstractPart> filterByQuantity(List<AbstractPart> parts) {
+    private List<AbstractPart> getAllParts(AbstractConfig config, Module module) {
+        List<AbstractPart> parts = new ArrayList<>();
+        if (config == null) return parts;
+
+        Sheet sheet = excelReader.getWorkbook().getSheet(module.toString());
+        for (Row row : sheet) {
+            if (row.getRowNum() < 10 || isRowEmpty(row)) continue;
+            parts.add(createPart(row));
+        }
+        return parts;
+    }
+
+    private AbstractPart createPart(Row row) {
+        return FactoryPart.createPart(excelReader.getPartParams(row));
+    }
+
+    private List<AbstractPart> filterByQuantity(List<AbstractPart> parts) {
         return parts.stream()
                 .filter(part -> part.getQuantity() != 0)
                 .toList();
     }
 
-    private static List<AbstractPart> filterByMaterial(List<AbstractPart> parts, String materialType) {
+    private List<AbstractPart> filterByMaterial(List<AbstractPart> parts, String materialType) {
         boolean isSteelPart = MaterialType.STEEL.name().equals(materialType);
         return parts.stream()
                 .filter(part -> isSteelPart
                     ? isSteelMaterial(part.getMaterial())
                     : materialType.equals(part.getMaterial()))
                 .toList();
-
-
-//        if (MaterialType.SHEET.toString().equals(materialType)) {
-//            return parts.stream()
-//                    .filter(part -> MaterialType.S235.toString().equals(part.getMaterial()) ||
-//                            MaterialType.DX51D.toString().equals(part.getMaterial()) ||
-//                            MaterialType.A304.toString().equals(part.getMaterial()))
-//                    .toList();
-//        } else {
-//            return parts.stream()
-//                    .filter(part -> materialType.equals(part.getMaterial()))
-//                    .toList();
-//        }
     }
 
-    private static boolean isSteelMaterial(String materialType) {
+    private boolean isSteelMaterial(String materialType) {
         return switch (materialType) {
             case "A304", "A316", "DX51D", "S235" -> true;
             default -> false;
         };
     }
 
-    private void processPartFiles(AbstractPart part, File[] files, File targetFolder) {
-        for (File file : files) {
-            if (!file.isFile()) continue;
+    private void copyMatchingFiles(File sourceFolder, File targetFolder, List<AbstractPart> parts) {
+        File[] files = Objects.requireNonNullElse(sourceFolder.listFiles(),new File[0]);
 
-            Path targetFilePath = getTargetFilePath(file, part, targetFolder);
-            if (targetFilePath == null) continue;
+        for (AbstractPart part : parts) {
+            for (File file : files) {
+                if (!file.isFile()) continue;
 
-            copyFile(file, targetFilePath);
+                Path targetFilePath = getTargetFilePath(file, part, targetFolder);
+                if (targetFilePath == null) continue;
+
+                copyFile(file, targetFilePath);
+            }
         }
     }
 
     private Path getTargetFilePath(File file, AbstractPart part, File targetFolder) {
+        Path path = null;
+        String fileName = file.getName();
+        String partNumber = part.getNumberEDT();
         int signs = part.getNumberEDT().startsWith("ZM") ? 13 : 16;
 
-        if ((isFileExtension(file, "dwg") || isFileExtension(file, "dxf")) && file.getName().startsWith(part.getNumberEDT())) {
-            return Paths.get(targetFolder.getPath(), part.toString());
-        } else if (isFileExtension(file, "pdf") && file.getName().startsWith(part.getNumberEDT().substring(0, signs))) {
-            return Paths.get(targetFolder.getPath(), file.getName());
+        if (isMatchingDrawingFile(fileName, partNumber)) {
+            path = Paths.get(targetFolder.getPath(), part.toString());
         }
 
-        return null;
+        if (isMatchingPdfFile(fileName, partNumber, signs)) {
+            path = Paths.get(targetFolder.getPath(), fileName);
+        }
+
+        return path;
     }
 
     private void copyFile(File file, Path targetFilePath) {
@@ -139,7 +148,15 @@ public class FileHandler {
         return sourceFolder.isDirectory() && targetFolder.exists();
     }
 
-    private boolean isFileExtension(File file, String fileExtension) {
-        return (file.getName().endsWith(fileExtension.toUpperCase()) || file.getName().endsWith(fileExtension.toLowerCase()));
+    private boolean isMatchingDrawingFile(String fileName, String partNumber) {
+        return (isFileExtension(fileName, "dwg") || isFileExtension(fileName, "dxf")) && fileName.startsWith(partNumber);
+    }
+
+    private boolean isMatchingPdfFile(String fileName, String partNumber, int signs) {
+        return isFileExtension(fileName, "pdf") && fileName.startsWith(partNumber.substring(0, signs));
+    }
+
+    private boolean isFileExtension(String fileName, String fileExtension) {
+        return (fileName.endsWith(fileExtension.toUpperCase()) || fileName.endsWith(fileExtension.toLowerCase()));
     }
 }

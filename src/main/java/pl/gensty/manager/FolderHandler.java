@@ -9,7 +9,7 @@ import javax.swing.*;
 import java.io.File;
 import java.util.Objects;
 
-import static pl.gensty.utils.ExcelReader.*;
+import static pl.gensty.utils.Utils.isSingleCharNumber;
 
 public class FolderHandler {
     private final JTextArea outputArea;
@@ -58,49 +58,20 @@ public class FolderHandler {
         String folderMaterial = MaterialType.DX51D.name().equals(abstractConfig.getMaterial()) ? "DX51D+S235" : abstractConfig.getMaterial();
 
         int quantity;
-        String replacement;
+        String moduleName;
         if(abstractConfig instanceof ConfigOther) {
             quantity = abstractConfig.getDeviceQuantity();
-            replacement = " ";
+            moduleName = " ";
         } else {
             quantity = moduleQuantity;
-            replacement = "_" + module.name() + " ";
+            moduleName = "_" + module.name() + " ";
         }
 
         return String.format("ZL_%s - %s%s%s (x%s)",
                 abstractConfig.getOrder(),
                 abstractConfig.getSize(),
-                replacement,
+                moduleName,
                 folderMaterial,
                 isSingleCharNumber(quantity));
     }
-
-//    private String setFolderName(AbstractConfig abstractConfig, Module module, MaterialType materialType) {
-//        //TODO: nie działa metoda readModuleQuantity
-////        Integer moduleQuantity = readModuleQuantity(excelPath, abstractConfig, module);
-//        Integer moduleQuantity = 1;
-//        String replacement = (abstractConfig instanceof ConfigOther) ? " " : "_" + module.name() + " ";
-//
-//        String temporaryFolderName = (materialType == MaterialType.STEEL)
-//                ? abstractConfig.setFolderName().replace("module", replacement)
-//                : abstractConfig.setFolderName(materialType).replace("module", replacement);
-//
-//        int quantity = (abstractConfig instanceof ConfigOther) ? abstractConfig.getDeviceQuantity() : moduleQuantity;
-//
-//        return temporaryFolderName.replace("quantity", isSingleCharNumber(quantity));
-//    }
-//
-//    public String setFolderName() {
-//        String folderMaterial;
-//        if (MaterialType.DX51D.toString().equals(material)) {
-//            folderMaterial = "DX51D+S235";
-//        } else {
-//            folderMaterial = material;
-//        }
-//        return "ZL_" + order + " - " + size + "module" + folderMaterial + " (x" + "quantity" + ")";
-//    }
-//
-//    public String setFolderName(MaterialType materialType) {
-//        return "ZL_" + order + " - " + size + "module" + materialType.name() + " (x" + "quantity" + ")";
-//    }
 }

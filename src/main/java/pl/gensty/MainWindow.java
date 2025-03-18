@@ -1,5 +1,6 @@
 package pl.gensty;
 
+import pl.gensty.GUI.buttons.DeviceButtonCreator;
 import pl.gensty.enums.DeviceType;
 
 import javax.swing.*;
@@ -21,27 +22,19 @@ public class MainWindow extends JFrame{
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        createDeviceButton(DeviceType.REDLER, 0, panel, gbc);
-        createDeviceButton(DeviceType.PODNOSNIK, 1, panel, gbc);
-        createDeviceButton(DeviceType.ZASUWA, 2, panel, gbc);
-        createDeviceButton(DeviceType.ROZDZIELACZ, 3, panel, gbc);
-
+        createAllDeviceButtons(getAvailableDevices(), gbc, panel);
         add(panel);
     }
 
-    private void createDeviceButton(DeviceType deviceType, int gridY, JPanel panel, GridBagConstraints gbc) {
-        JButton button = new JButton(deviceType.toString());
-        button.setPreferredSize(new Dimension(300, 30));
-        button.addActionListener(e -> openCreatorWindow(deviceType));
-
-        gbc.gridx = 0;
-        gbc.gridy = gridY;
-        panel.add(button, gbc);
+    private DeviceType[] getAvailableDevices() {
+        return new DeviceType[]{DeviceType.REDLER, DeviceType.PODNOSNIK, DeviceType.ZASUWA, DeviceType.ROZDZIELACZ};
     }
 
-    private void openCreatorWindow(DeviceType deviceType) {
-        DeviceCreator creator = new DeviceCreator(deviceType);
-        creator.setVisible(true);
-        this.dispose();
+    private void createAllDeviceButtons(DeviceType[] devices, GridBagConstraints gbc, JPanel panel) {
+        for (int i = 0; i < devices.length; i++) {
+            gbc.gridy = i;
+            JButton button = new DeviceButtonCreator(devices[i]).createButton(this);
+            panel.add(button, gbc);
+        }
     }
 }

@@ -2,19 +2,24 @@ package pl.gensty.configuration.strategy;
 
 import pl.gensty.configuration.AbstractConfig;
 import pl.gensty.configuration.ConfigSPR;
-
-import static pl.gensty.utils.ExcelReader.getDeviceConfig;
+import pl.gensty.utils.ExcelReader;
 
 public class ConfigBuilderStrategySPR implements ConfigBuilderStrategy {
+    private final ExcelReader excelReader;
+
+    public ConfigBuilderStrategySPR(ExcelReader excelReader) {
+        this.excelReader = excelReader;
+    }
+
     @Override
     public AbstractConfig buildConfig(String excelPath) {
         return ConfigSPR.builder()
-                .order(getDeviceConfig(excelPath, ORDER))
-                .type(getDeviceConfig(excelPath, TYPE))
-                .size(getDeviceConfig(excelPath, SIZE))
-                .material(getDeviceConfig(excelPath, MATERIAL))
-                .deviceQuantity(Integer.parseInt(getDeviceConfig(excelPath, DEVICE_QUANTITY)))
-                .chainSupport(getDeviceConfig(excelPath, CHAIN_SUPPORT))
+                .order(excelReader.getDeviceConfig(ORDER))
+                .type(excelReader.getDeviceConfig(TYPE))
+                .size(excelReader.getDeviceConfig(SIZE))
+                .material(excelReader.getDeviceConfig(MATERIAL))
+                .deviceQuantity(Integer.parseInt(excelReader.getDeviceConfig(DEVICE_QUANTITY)))
+                .chainSupport(excelReader.getDeviceConfig(CHAIN_SUPPORT))
                 .build();
     }
 }

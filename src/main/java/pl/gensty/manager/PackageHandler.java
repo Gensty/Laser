@@ -6,6 +6,7 @@ import pl.gensty.enums.DeviceType;
 import pl.gensty.enums.MaterialType;
 import pl.gensty.enums.Module;
 
+import java.io.IOException;
 import java.util.List;
 
 public class PackageHandler {
@@ -19,8 +20,7 @@ public class PackageHandler {
         this.pathHandler = pathHandler;
     }
 
-    public void preparePackage(DeviceType deviceType, MaterialType materialType) {
-
+    public void createPackage(DeviceType deviceType, MaterialType materialType) throws IOException {
         String excelPath = pathHandler.getExcelPath();
         AbstractConfig abstractConfig = FactoryConfig.createConfig(deviceType, excelPath);
 

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
-import static pl.gensty.utils.ExcelReader.isSingleCharNumber;
+import static pl.gensty.utils.Utils.isSingleCharNumber;
 
 @AllArgsConstructor
 @Getter
