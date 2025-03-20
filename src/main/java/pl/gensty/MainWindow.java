@@ -26,15 +26,15 @@ public class MainWindow extends JFrame{
         add(panel);
     }
 
-    private DeviceType[] getAvailableDevices() {
-        return new DeviceType[]{DeviceType.REDLER, DeviceType.PODNOSNIK, DeviceType.ZASUWA, DeviceType.ROZDZIELACZ};
-    }
-
     private void createAllDeviceButtons(DeviceType[] devices, GridBagConstraints gbc, JPanel panel) {
         for (int i = 0; i < devices.length; i++) {
             gbc.gridy = i;
             JButton button = new DeviceButtonCreator(devices[i]).createButton(this);
             panel.add(button, gbc);
         }
+    }
+
+    private DeviceType[] getAvailableDevices() {
+        return new DeviceType[]{DeviceType.REDLER, DeviceType.PODNOSNIK, DeviceType.ZASUWA, DeviceType.ROZDZIELACZ};
     }
 }

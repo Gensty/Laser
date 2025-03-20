@@ -7,6 +7,7 @@ import pl.gensty.utils.ExcelReader;
 
 import javax.swing.*;
 
+import java.io.IOException;
 import java.util.Map;
 
 public class PathHandler {
@@ -30,7 +31,7 @@ public class PathHandler {
         return validatePath(excelPathField.getText(), "Podaj ściężkę do konfiguratora Excel.\n");
     }
 
-    public String getSourcePath(AbstractConfig abstractConfig, Module module) {
+    public String getSourcePath(AbstractConfig abstractConfig, Module module) throws IOException {
         Map<String, String> paths = excelReader.readPaths();
 
         String config = (abstractConfig instanceof ConfigOther)
@@ -42,7 +43,7 @@ public class PathHandler {
         if (sourcePath == null || sourcePath.isBlank()) {
             throw new IllegalArgumentException("Nie znaleziono ścieżki dla: " + config);
         }
-
+        excelReader.closeWorkbook();
         return sourcePath;
     }
 

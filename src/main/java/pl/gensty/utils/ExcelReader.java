@@ -27,7 +27,7 @@ public class ExcelReader {
         this.evaluator = workbook.getCreationHelper().createFormulaEvaluator();
     }
 
-    private void closeWorkbook() throws IOException {
+    public void closeWorkbook() throws IOException {
         if (workbook != null) {
             workbook.close();
         }
@@ -60,7 +60,7 @@ public class ExcelReader {
         );
     }
 
-    public Integer readModuleQuantity(Module module) {
+    public int readModuleQuantity(Module module) {
         Sheet sheet = workbook.getSheet(module.name());
         for (Row row : sheet) {
             if ("Ilość modułów".equals(getCellStringValue(row.getCell(0)))) {

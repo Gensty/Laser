@@ -4,6 +4,7 @@ import pl.gensty.configuration.AbstractConfig;
 import pl.gensty.configuration.ConfigOther;
 import pl.gensty.enums.MaterialType;
 import pl.gensty.enums.Module;
+import pl.gensty.utils.ExcelReader;
 
 import javax.swing.*;
 import java.io.File;
@@ -14,9 +15,11 @@ import static pl.gensty.utils.Utils.isSingleCharNumber;
 public class FolderHandler {
     private final JTextArea outputArea;
     private final PathHandler pathHandler;
+    private final ExcelReader excelReader;
 
-    public FolderHandler(PathHandler pathHandler, JTextArea outputArea) {
+    public FolderHandler(PathHandler pathHandler, ExcelReader excelReader, JTextArea outputArea) {
         this.pathHandler = pathHandler;
+        this.excelReader = excelReader;
         this.outputArea = outputArea;
     }
 
@@ -35,7 +38,6 @@ public class FolderHandler {
         } else {
             outputArea.append("Folder o nazwie " + folderName + " już istnieje.");
         }
-
         return folderPath;
     }
 
@@ -54,7 +56,6 @@ public class FolderHandler {
     }
 
     private String setFolderName(AbstractConfig abstractConfig, Module module) {
-        int moduleQuantity = 1; //TODO: Możliwe dodanie readModuleQuantity
         String folderMaterial = MaterialType.DX51D.name().equals(abstractConfig.getMaterial()) ? "DX51D+S235" : abstractConfig.getMaterial();
 
         int quantity;
@@ -63,7 +64,7 @@ public class FolderHandler {
             quantity = abstractConfig.getDeviceQuantity();
             moduleName = " ";
         } else {
-            quantity = moduleQuantity;
+            quantity = excelReader.readModuleQuantity(module);
             moduleName = "_" + module.name() + " ";
         }
 

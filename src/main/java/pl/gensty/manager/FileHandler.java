@@ -32,7 +32,7 @@ public class FileHandler {
         this.outputArea = outputArea;
     }
 
-    public void copyFiles(AbstractConfig abstractConfig, Module module, String targetPath, MaterialType materialType) {
+    public void copyFiles(AbstractConfig abstractConfig, Module module, String targetPath, MaterialType materialType) throws IOException {
         String sourcePath = pathHandler.getSourcePath(abstractConfig, module);
         List<AbstractPart> parts = getFilteredFiles(abstractConfig, materialType.toString(), module);
 
@@ -44,6 +44,7 @@ public class FileHandler {
         }
 
         copyMatchingFiles(sourceFolder, targetFolder, parts);
+        excelReader.closeWorkbook();
     }
 
     private List<AbstractPart> getFilteredFiles(AbstractConfig abstractConfig, String materialType, Module module) {
