@@ -32,17 +32,24 @@ public class PathHandler {
     }
 
     public String getSourcePath(AbstractConfig abstractConfig, Module module) throws IOException {
+        String configKey = (abstractConfig instanceof ConfigOther)
+                ? abstractConfig.getSize()
+                : abstractConfig.getSize() + "_" + module.name();
+        return getSourcePathByKey(configKey);
+    }
+
+    public String getSourcePath(String ZM_NR) throws IOException {
+        return getSourcePathByKey(ZM_NR);
+    }
+
+    private String getSourcePathByKey(String key) throws IOException {
         Map<String, String> paths = excelReader.readPaths();
-
-        String config = (abstractConfig instanceof ConfigOther)
-        ? abstractConfig.getSize()
-        : abstractConfig.getSize() + "_" + module.name();
-
-        String sourcePath = paths.get(config);
+        String sourcePath = paths.get(key);
 
         if (sourcePath == null || sourcePath.isBlank()) {
-            throw new IllegalArgumentException("Nie znaleziono ścieżki dla: " + config);
+            throw new IllegalArgumentException("Nie znaleziono ścieżki dla: " + key);
         }
+
         excelReader.closeWorkbook();
         return sourcePath;
     }

@@ -83,13 +83,37 @@ public class ExcelReader {
 
     public String getCellStringValue(Cell cell) {
         if (cell == null || cell.getCellType() == CellType.BLANK) return "";
-        if (cell.getCellType() == CellType.FORMULA) return evaluator.evaluate(cell).getStringValue();
+
+        if (cell.getCellType() == CellType.FORMULA) {
+            CellValue evaluatedValue = evaluator.evaluate(cell);
+            if (evaluatedValue == null) return "";
+            if (evaluatedValue.getCellType() == CellType.STRING) {
+                return evaluatedValue.getStringValue();
+            } else if (evaluatedValue.getCellType() == CellType.NUMERIC) {
+                return String.valueOf((int) evaluatedValue.getNumberValue());
+            }
+        }
+
         return cell.getStringCellValue();
     }
 
     public int getCellIntValue(Cell cell) {
         if (cell == null || cell.getCellType() == CellType.BLANK) return 0;
-        if (cell.getCellType() == CellType.FORMULA) return (int) evaluator.evaluate(cell).getNumberValue();
+
+        if (cell.getCellType() == CellType.FORMULA) {
+            CellValue evaluatedValue = evaluator.evaluate(cell);
+            if (evaluatedValue == null) return 0;
+            if (evaluatedValue.getCellType() == CellType.NUMERIC) {
+                return (int) evaluatedValue.getNumberValue();
+            } else if (evaluatedValue.getCellType() == CellType.STRING) {
+                try {
+                    return Integer.parseInt(evaluatedValue.getStringValue().trim());
+                } catch (NumberFormatException e) {
+                    return 0;
+                }
+            }
+        }
+
         return (int) cell.getNumericCellValue();
     }
 

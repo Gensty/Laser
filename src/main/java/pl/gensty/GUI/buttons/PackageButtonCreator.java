@@ -33,8 +33,9 @@ public class PackageButtonCreator {
             try {
                 ExcelReader excelReader = new ExcelReader(excelPathField.getText());
                 PathHandler pathHandler = new PathHandler(excelReader, excelPathField, catalogPathField, outputArea);
-                FileHandler fileHandler = new FileHandler(excelReader, pathHandler, outputArea);
+                FileHandler fileHandler = new FileHandler(excelReader, outputArea);
                 FolderHandler folderHandler = new FolderHandler(pathHandler, excelReader, outputArea);
+
                 PackageHandler packageHandler = new PackageHandler(folderHandler, fileHandler, pathHandler);
 
                 packageHandler.createPackage(deviceTypeShort, materialType);

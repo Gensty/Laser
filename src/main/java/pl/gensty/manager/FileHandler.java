@@ -22,20 +22,15 @@ import java.util.Objects;
 import static pl.gensty.utils.Utils.isRowEmpty;
 
 public class FileHandler {
-    private final PathHandler pathHandler;
     private final ExcelReader excelReader;
     private final JTextArea outputArea;
 
-    public FileHandler(ExcelReader excelReader, PathHandler pathHandler, JTextArea outputArea) {
+    public FileHandler(ExcelReader excelReader, JTextArea outputArea) {
         this.excelReader = excelReader;
-        this.pathHandler = pathHandler;
         this.outputArea = outputArea;
     }
 
-    public void copyFiles(AbstractConfig abstractConfig, Module module, String targetPath, MaterialType materialType) throws IOException {
-        String sourcePath = pathHandler.getSourcePath(abstractConfig, module);
-        List<AbstractPart> parts = getFilteredFiles(abstractConfig, materialType.toString(), module);
-
+    public void copyFiles(AbstractConfig abstractConfig, String sourcePath, String targetPath, List<AbstractPart> parts) throws IOException {
         File sourceFolder = new File(sourcePath);
         File targetFolder = new File(targetPath);
 
@@ -43,34 +38,39 @@ public class FileHandler {
             return;
         }
 
-        copyMatchingFiles(sourceFolder, targetFolder, parts);
+        copyMatchingFiles(abstractConfig, sourceFolder, targetFolder, parts);
         excelReader.closeWorkbook();
     }
 
-    private List<AbstractPart> getFilteredFiles(AbstractConfig abstractConfig, String materialType, Module module) {
+    public List<AbstractPart> getElementFiles(AbstractConfig abstractConfig, String materialType, Module module) {
         List<AbstractPart> parts = getAllParts(abstractConfig, module);
-        List<AbstractPart> filteredByQuantity = filterByQuantity(parts);
-        List<AbstractPart> filteredByMaterial = filterByMaterial(filteredByQuantity, materialType);
+        List<AbstractPart> filteredByMaterial = filterByMaterial(parts, materialType);
 
-        if (MaterialType.A304.toString().equals(abstractConfig.getMaterial()) || MaterialType.A316.toString().equals(abstractConfig.getMaterial())) {
-            return filteredByMaterial;
-        } else {
-            return filteredByMaterial.stream()
-                    .filter(part -> !part.getNumberEDT().startsWith("ZM"))
-                    .toList();
-        }
+        return filteredByMaterial.stream()
+                .filter(part -> !part.getNumberEDT().startsWith("ZM") && !part.getNumberEDT().startsWith("NR"))
+                .toList();
+    }
+
+    public List<AbstractPart> getZM_NR_Files(AbstractConfig abstractConfig, String materialType, Module module) {
+        List<AbstractPart> parts = getAllParts(abstractConfig, module);
+        List<AbstractPart> filteredByMaterial = filterByMaterial(parts, materialType);
+
+        return filteredByMaterial.stream()
+                .filter(part -> part.getNumberEDT().startsWith("ZM") || part.getNumberEDT().startsWith("NR"))
+                .toList();
     }
 
     private List<AbstractPart> getAllParts(AbstractConfig config, Module module) {
-        List<AbstractPart> parts = new ArrayList<>();
-        if (config == null) return parts;
+        List<AbstractPart> allParts = new ArrayList<>();
+        if (config == null) return allParts;
 
         Sheet sheet = excelReader.getWorkbook().getSheet(module.toString());
         for (Row row : sheet) {
             if (row.getRowNum() < 10 || isRowEmpty(row)) continue;
-            parts.add(createPart(row));
+            AbstractPart part = createPart(row);
+            allParts.add(part);
         }
-        return parts;
+        return filterByQuantity(allParts);
     }
 
     private AbstractPart createPart(Row row) {
@@ -99,14 +99,14 @@ public class FileHandler {
         };
     }
 
-    private void copyMatchingFiles(File sourceFolder, File targetFolder, List<AbstractPart> parts) {
+    private void copyMatchingFiles(AbstractConfig abstractConfig, File sourceFolder, File targetFolder, List<AbstractPart> parts) {
         File[] files = Objects.requireNonNullElse(sourceFolder.listFiles(),new File[0]);
 
         for (AbstractPart part : parts) {
             for (File file : files) {
                 if (!file.isFile()) continue;
 
-                Path targetFilePath = getTargetFilePath(file, part, targetFolder);
+                Path targetFilePath = getTargetFilePath(abstractConfig, file, part, targetFolder);
                 if (targetFilePath == null) continue;
 
                 copyFile(file, targetFilePath);
@@ -114,11 +114,18 @@ public class FileHandler {
         }
     }
 
-    private Path getTargetFilePath(File file, AbstractPart part, File targetFolder) {
+    private Path getTargetFilePath(AbstractConfig abstractConfig, File file, AbstractPart part, File targetFolder) {
         Path path = null;
         String fileName = file.getName();
         String partNumber = part.getNumberEDT();
-        int signs = part.getNumberEDT().startsWith("ZM") ? 13 : 16;
+
+        int signs;
+
+        if (partNumber.startsWith("ZM") || partNumber.startsWith("NR")) {
+            signs = 13;
+        } else {
+            signs = fileNameLength(abstractConfig);
+        }
 
         if (isMatchingDrawingFile(fileName, partNumber)) {
             path = Paths.get(targetFolder.getPath(), part.toString());
@@ -159,5 +166,13 @@ public class FileHandler {
 
     private boolean isFileExtension(String fileName, String fileExtension) {
         return (fileName.endsWith(fileExtension.toUpperCase()) || fileName.endsWith(fileExtension.toLowerCase()));
+    }
+
+    private int fileNameLength(AbstractConfig abstractConfig) {
+        String config = abstractConfig.getType();
+        switch (config) {
+            case "ZPR", "NPK" -> {return 16;}
+            default -> {return 15;}
+        }
     }
 }
